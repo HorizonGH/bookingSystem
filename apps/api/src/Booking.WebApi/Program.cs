@@ -1,5 +1,7 @@
+using Booking.Application.Common.Interfaces;
 using Booking.Infrastructure.Extensions;
 using Booking.Infrastructure.Persistence;
+using Booking.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Add Infrastructure layer with Database
+// Add HttpContextAccessor for CurrentUserService
+builder.Services.AddHttpContextAccessor();
+
+// Register CurrentUserService
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Add Infrastructure layer with Database and Authentication
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
@@ -26,6 +34,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Enable Authentication & Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 
