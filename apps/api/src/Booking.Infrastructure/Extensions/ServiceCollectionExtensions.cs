@@ -2,6 +2,7 @@ using System.Text;
 using Booking.Application.Common.Interfaces;
 using Booking.Application.Common.Models;
 using Booking.Infrastructure.Persistence;
+using Booking.Infrastructure.Repositories;
 using Booking.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+
+        // Register generic repository
+        services.AddScoped(typeof(IRepository<>), typeof(Repositories.Repository<>));
 
         // Configure JWT Authentication
         services.AddAuthentication(options =>
