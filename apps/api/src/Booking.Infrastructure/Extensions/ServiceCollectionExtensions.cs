@@ -49,8 +49,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
-        // Register generic repository
-        services.AddScoped(typeof(IRepository<>), typeof(Repositories.Repository<>));
+        // Register repositories and Unit of Work
+        services.AddScoped(typeof(IReadRepository<>), typeof(Repositories.ReadRepository<>));
+        services.AddScoped(typeof(IWriteRepository<>), typeof(Repositories.WriteRepository<>));
+        services.AddScoped<IUnitOfWork, Repositories.UnitOfWork>();
 
         // Configure JWT Authentication
         services.AddAuthentication(options =>
