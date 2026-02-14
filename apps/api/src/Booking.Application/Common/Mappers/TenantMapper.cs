@@ -1,4 +1,5 @@
 using Booking.Application.Common.DTOs.Tenancy;
+using Booking.Application.Features.Tenancy.Commands.Update;
 using Booking.Domain.Entities.Tenancy;
 using Riok.Mapperly.Abstractions;
 
@@ -35,6 +36,6 @@ public static partial class TenantMapper
     [MapperIgnoreTarget(nameof(Tenant.Created))]
     [MapperIgnoreTarget(nameof(Tenant.LastModified))]
     [MapperIgnoreTarget(nameof(Tenant.StatusBaseEntity))]
-    [MapperIgnoreSource(nameof(UpdateTenantRequest.Id))]
-    public static partial void UpdateEntity(UpdateTenantRequest request, Tenant tenant);
+    [MapperIgnoreSource(nameof(UpdateTenantCommand.Id))]
+    public static partial void UpdateEntity(UpdateTenantCommand request, Tenant tenant);
 }

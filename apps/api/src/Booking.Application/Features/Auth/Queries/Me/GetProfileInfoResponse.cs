@@ -11,6 +11,7 @@ public record GetProfileInfoResponse
     public string? PhoneNumber { get; set; }
     public string Role { get; set; } = string.Empty;
     public ICollection<ReservationDto> Reservations { get; set; } = new List<ReservationDto>();
+    public Guid? TenantId { get; set; }
 
     // public int ReservationCount { get; set; }
     // public int CompletedReservationCount { get; set; }

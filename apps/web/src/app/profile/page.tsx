@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { authService, User, ReservationDto } from '../../services/auth';
+import { authService, User, ReservationDto, Tenant } from '../../services/auth';
 import { ApiError } from '../../services/api';
+import TenantManagement from '../../components/TenantManagement';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTenantLoading, setIsTenantLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -15,6 +18,19 @@ export default function ProfilePage() {
       try {
         const userData = await authService.getCurrentUser();
         setUser(userData);
+        
+        // Fetch tenant data if user is a tenant admin
+        if (userData.tenantId) {
+          setIsTenantLoading(true);
+          try {
+            const tenantData = await authService.getTenant(userData.tenantId);
+            setTenant(tenantData);
+          } catch (err) {
+            console.error('Failed to load tenant data:', err);
+          } finally {
+            setIsTenantLoading(false);
+          }
+        }
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
@@ -188,6 +204,24 @@ export default function ProfilePage() {
 
             {/* Right Column: Reservations */}
             <div className="lg:col-span-2 space-y-8">
+              {/* Tenant Management - Only show if user is tenant admin */}
+              {user.tenantId && tenant && (
+                <TenantManagement 
+                  tenant={tenant} 
+                  tenantId={user.tenantId}
+                  onUpdate={(updatedTenant) => setTenant(updatedTenant)}
+                />
+              )}
+              
+              {user.tenantId && isTenantLoading && (
+                <div className="bg-white dark:bg-dark-light rounded-2xl shadow-xl p-8 border border-light-darker dark:border-secondary-700">
+                  <div className="text-center py-12">
+                    <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-secondary-600 dark:text-secondary-400">Cargando información del negocio...</p>
+                  </div>
+                </div>
+              )}
+
               {/* Reservations List */}
               <div className="bg-white/50 dark:bg-dark-light/30 rounded-3xl border border-light-darker dark:border-secondary-700/50 p-6 md:p-8 backdrop-blur-sm">
                 <div className="flex justify-between items-center mb-6">

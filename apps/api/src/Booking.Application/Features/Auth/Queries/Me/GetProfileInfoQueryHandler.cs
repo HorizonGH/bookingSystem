@@ -40,6 +40,7 @@ public class GetProfileInfoQueryHandler : IRequestHandler<GetProfileInfoQuery, G
             LastName = user.LastName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
+            TenantId = user.TenantId,
             //Role = user.Plan,
             Reservations = userReservations.Select(r => new ReservationDto
             {

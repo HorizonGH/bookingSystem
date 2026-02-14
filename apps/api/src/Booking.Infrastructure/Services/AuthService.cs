@@ -1,7 +1,9 @@
 using Booking.Application.Common.DTOs.Auth;
 using Booking.Application.Common.Interfaces;
 using Booking.Application.Common.Models;
+using Booking.Application.Common.Utilities;
 using Booking.Domain.Entities.Idendity;
+using Booking.Domain.Entities.Tenancy;
 using Booking.Domain.Enums;
 using Booking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +129,132 @@ public class AuthService : IAuthService
 
         // Generate tokens
         var roles = new List<string> { clientRole.Name };
+        var accessToken = _jwtService.GenerateAccessToken(user, roles);
+        var refreshToken = _jwtService.GenerateRefreshToken();
+
+        // Save refresh token
+        await _tokenService.CreateRefreshTokenAsync(user.Id, refreshToken, cancellationToken);
+
+        var userDto = new UserDto(
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            user.PhoneNumber,
+            user.TenantId,
+            user.IsEmailVerified,
+            roles
+        );
+
+        var response = new AuthResponse(
+            accessToken,
+            refreshToken,
+            DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+            userDto
+        );
+
+        return Result<AuthResponse>.Success(response);
+    }
+
+    public async Task<Result<AuthResponse>> RegisterSaasTenantAsync(RegisterSaasTenantRequest request, CancellationToken cancellationToken = default)
+    {
+        // Check if email already exists
+        var existingUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == request.UserRequest.Email, cancellationToken);
+
+        if (existingUser != null)
+            return Result<AuthResponse>.Failure("Email already registered");
+
+        // Get TenantAdmin role
+        var tenantAdminRole = await _context.Roles
+            .FirstOrDefaultAsync(r => r.RoleType == RoleType.TenantAdmin, cancellationToken);
+
+        if (tenantAdminRole == null)
+            return Result<AuthResponse>.Failure("TenantAdmin role not found in the system");
+
+        // Get the selected plan
+        var plan = await _context.Plans
+            .FirstOrDefaultAsync(p => p.PlanType == request.TenantRequest.PlanType, cancellationToken);
+
+        if (plan == null)
+            return Result<AuthResponse>.Failure($"Plan '{request.TenantRequest.PlanType}' not found in the system");
+
+        // Generate unique slug for tenant
+        var baseSlug = SlugGenerator.GenerateSlug(request.TenantRequest.Name);
+        var existingSlugs = await _context.Tenants
+            .Where(t => t.Slug.StartsWith(baseSlug))
+            .Select(t => t.Slug)
+            .ToListAsync(cancellationToken);
+
+        var uniqueSlug = SlugGenerator.GenerateUniqueSlug(baseSlug, slug => existingSlugs.Contains(slug));
+
+        // Create tenant
+        var tenant = new Tenant
+        {
+            Name = request.TenantRequest.Name,
+            Slug = uniqueSlug,
+            Description = request.TenantRequest.Description,
+            LogoUrl = request.TenantRequest.LogoUrl,
+            Website = request.TenantRequest.Website,
+            Email = request.UserRequest.Email, // Use user's email for tenant
+            PhoneNumber = request.UserRequest.PhoneNumber, // Use user's phone for tenant
+            Address = request.TenantRequest.Address,
+            City = request.TenantRequest.City,
+            State = request.TenantRequest.State,
+            Country = request.TenantRequest.Country,
+            PostalCode = request.TenantRequest.PostalCode,
+            BusinessHours = request.TenantRequest.BusinessHours,
+            Created = DateTime.UtcNow
+        };
+
+        _context.Tenants.Add(tenant);
+
+        // Create tenant plan
+        var tenantPlan = new TenantPlan
+        {
+            TenantId = tenant.Id,
+            PlanId = plan.Id,
+            StartDate = DateTime.UtcNow,
+            SubscriptionStatus = SubscriptionStatus.Active,
+            TrialEndsAt = plan.PlanType == PlanType.Free ? null : DateTime.UtcNow.AddDays(14), // 14-day trial for paid plans
+            NextBillingDate = plan.PlanType == PlanType.Free ? null : DateTime.UtcNow.AddMonths(1),
+            CurrentPrice = plan.Price,
+            CurrentWorkers = 0,
+            CurrentServices = 0,
+            ReservationsThisMonth = 0,
+            Created = DateTime.UtcNow
+        };
+
+        _context.TenantPlans.Add(tenantPlan);
+
+        // Create user
+        var user = new User
+        {
+            FirstName = request.UserRequest.FirstName,
+            LastName = request.UserRequest.LastName,
+            Email = request.UserRequest.Email,
+            PasswordHash = _passwordHasher.HashPassword(request.UserRequest.Password),
+            PhoneNumber = request.UserRequest.PhoneNumber,
+            TenantId = tenant.Id, // Link user to their tenant
+            IsEmailVerified = false,
+            StatusBaseEntity = StatusBaseEntity.Active
+        };
+
+        _context.Users.Add(user);
+
+        // Assign TenantAdmin role
+        var userRole = new UserRole
+        {
+            UserId = user.Id,
+            RoleId = tenantAdminRole.Id
+        };
+
+        _context.UserRoles.Add(userRole);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Generate tokens
+        var roles = new List<string> { tenantAdminRole.Name };
         var accessToken = _jwtService.GenerateAccessToken(user, roles);
         var refreshToken = _jwtService.GenerateRefreshToken();
 

@@ -6,12 +6,8 @@ import { authService } from '../../services/auth';
 import { ApiError } from '../../services/api';
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,25 +18,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      if (isLogin) {
-        const response = await authService.login({ email, password });
-        // Store tokens in localStorage
-        localStorage.setItem('authToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('expiresAt', response.expiresAt);
-        console.log('Login successful:', response.user);
-        // Redirect to dashboard or home
-        window.location.href = '/';
-      } else {
-        const response = await authService.register({ firstName, lastName, email, password, phoneNumber: phoneNumber || undefined });
-        // Store tokens in localStorage
-        localStorage.setItem('authToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('expiresAt', response.expiresAt);
-        console.log('Registration successful:', response.user);
-        // Redirect to dashboard or home
-        window.location.href = '/';
-      }
+      const response = await authService.login({ email, password });
+      // Store tokens in localStorage
+      localStorage.setItem('authToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('expiresAt', response.expiresAt);
+      console.log('Login successful:', response.user);
+      // Redirect to dashboard or home
+      window.location.href = '/';
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -50,15 +35,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setEmail('');
-    setPassword('');
-    setFirstName('');
-    setLastName('');
-    setPhoneNumber('');
   };
 
   return (
@@ -91,12 +67,10 @@ export default function LoginPage() {
 
             <div className="relative z-10">
               <h1 className="text-3xl font-bold mb-2">
-                {isLogin ? 'Bienvenido de Nuevo' : 'Crear Cuenta'}
+                Bienvenido de Nuevo
               </h1>
               <p className="text-primary-50">
-                {isLogin
-                  ? 'Inicia sesión para gestionar tus reservas'
-                  : 'Crea tu cuenta y comienza a reservar'}
+                Inicia sesión para gestionar tus reservas
               </p>
             </div>
           </div>
@@ -109,65 +83,6 @@ export default function LoginPage() {
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Name fields (register only) */}
-              {!isLogin && (
-                <>
-                  <div className="animate-slideDown">
-                    <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                      Nombre
-                    </label>
-                    <div className="relative">
-                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Juan"
-                        required={!isLogin}
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark-light text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                      />
-                    </div>
-                  </div>
-                  <div className="animate-slideDown">
-                    <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                      Apellido
-                    </label>
-                    <div className="relative">
-                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <input
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Pérez"
-                        required={!isLogin}
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark-light text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                      />
-                    </div>
-                  </div>
-                  <div className="animate-slideDown">
-                    <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                      Número de Teléfono
-                    </label>
-                    <div className="relative">
-                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <input
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder="+1 (555) 123-4567"
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark-light text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
 
               {/* Email */}
               <div>
@@ -223,8 +138,7 @@ export default function LoginPage() {
               </div>
 
               {/* Remember / Forgot */}
-              {isLogin && (
-                <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer text-secondary-700 dark:text-secondary-300">
                     <input
                       type="checkbox"
@@ -239,7 +153,6 @@ export default function LoginPage() {
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-              )}
 
               {/* Submit */}
               <button
@@ -253,7 +166,7 @@ export default function LoginPage() {
                     <span>Procesando...</span>
                   </>
                 ) : (
-                  <span>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
+                  <span>Iniciar Sesión</span>
                 )}
               </button>
 
@@ -294,15 +207,14 @@ export default function LoginPage() {
               {/* Toggle mode */}
               <div className="text-center pt-4 border-t border-light-darker dark:border-secondary-700">
                 <p className="text-secondary-600 dark:text-secondary-400">
-                  {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
+                  ¿No tienes cuenta?
                   {' '}
-                  <button
-                    type="button"
-                    onClick={toggleMode}
+                  <Link
+                    href="/signup"
                     className="text-primary-600 dark:text-primary-400 font-semibold hover:underline"
                   >
-                    {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
-                  </button>
+                    Regístrate aquí
+                  </Link>
                 </p>
               </div>
             </form>
