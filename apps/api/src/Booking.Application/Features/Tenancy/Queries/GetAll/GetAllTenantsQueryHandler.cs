@@ -6,20 +6,21 @@ using Booking.Application.Features.Tenancy.Queries;
 using Booking.Domain.Entities.Tenancy;
 using MediatR;
 
-namespace Booking.Application.Features.Tenancy.Handlers;
+namespace Booking.Application.Features.Tenancy.Queries.GetAll;
 
 public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, PagedResult<TenantDto>>
 {
-    private readonly IReadRepository<Tenant> _tenantRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetAllTenantsQueryHandler(IReadRepository<Tenant> tenantRepository)
+    public GetAllTenantsQueryHandler(IUnitOfWork unitOfWork)
     {
-        _tenantRepository = tenantRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<TenantDto>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
     {
-        var query = _tenantRepository.GetAllFiltered(
+        var tenantRepo = _unitOfWork.ReadRepository<Tenant>();
+        var query = tenantRepo.GetAllFiltered(
             paginationRequest: request.Pagination,
             defaultSortExpression: t => t.Name,
             searchFields:

@@ -5,14 +5,9 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Auth;
 
-public class RegisterEndpoint : Endpoint<RegisterCommand, AuthResponse>
+public class RegisterEndpoint : CoreEndpoint<RegisterCommand, AuthResponse>
 {
-    private readonly IMediator _mediator;
-
-    public RegisterEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public RegisterEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

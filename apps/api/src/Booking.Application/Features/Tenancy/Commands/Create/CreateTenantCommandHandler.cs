@@ -1,11 +1,10 @@
 using Booking.Application.Common.DTOs.Tenancy;
 using Booking.Application.Common.Interfaces;
 using Booking.Application.Common.Mappers;
-using Booking.Application.Features.Tenancy.Commands;
 using Booking.Domain.Entities.Tenancy;
 using MediatR;
 
-namespace Booking.Application.Features.Tenancy.Handlers;
+namespace Booking.Application.Features.Tenancy.Commands.Create;
 
 public class CreateTenantCommandHandler : IRequestHandler<CreateTenantCommand, TenantDto>
 {
@@ -21,7 +20,8 @@ public class CreateTenantCommandHandler : IRequestHandler<CreateTenantCommand, T
         var tenant = TenantMapper.ToEntity(request.Request);
         tenant.Created = DateTime.UtcNow;
 
-        await _unitOfWork.Repository<Tenant>().AddAsync(tenant);
+        var tenantRepo = _unitOfWork.WriteRepository<Tenant>();
+        await tenantRepo.AddAsync(tenant);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return TenantMapper.ToDto(tenant);

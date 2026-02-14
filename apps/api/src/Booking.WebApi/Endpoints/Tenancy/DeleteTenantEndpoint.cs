@@ -1,17 +1,13 @@
 using Booking.Application.Features.Tenancy.Commands;
+using Booking.Application.Features.Tenancy.Commands.Delete;
 using FastEndpoints;
 using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class DeleteTenantEndpoint : EndpointWithoutRequest
+public class DeleteTenantEndpoint : CoreEndpointWithoutRequest
 {
-    private readonly IMediator _mediator;
-
-    public DeleteTenantEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public DeleteTenantEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

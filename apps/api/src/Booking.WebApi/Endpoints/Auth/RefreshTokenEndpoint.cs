@@ -5,14 +5,9 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Auth;
 
-public class RefreshTokenEndpoint : Endpoint<RefreshTokenCommand, AuthResponse>
+public class RefreshTokenEndpoint : CoreEndpoint<RefreshTokenCommand, AuthResponse>
 {
-    private readonly IMediator _mediator;
-
-    public RefreshTokenEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public RefreshTokenEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

@@ -5,14 +5,12 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Auth;
 
-public class LogoutEndpoint : EndpointWithoutRequest
+public class LogoutEndpoint : CoreEndpointWithoutRequest
 {
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUser;
 
-    public LogoutEndpoint(IMediator mediator, ICurrentUserService currentUser)
+    public LogoutEndpoint(IMediator mediator, ICurrentUserService currentUser) : base(mediator)
     {
-        _mediator = mediator;
         _currentUser = currentUser;
     }
 

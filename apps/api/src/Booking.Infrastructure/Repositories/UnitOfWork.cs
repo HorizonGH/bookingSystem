@@ -15,11 +15,18 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
     }
 
-    public IWriteRepository<T> Repository<T>() where T : class
+    public IWriteRepository<T> WriteRepository<T>() where T : class
     {
         return (IWriteRepository<T>)_repositories.GetOrAdd(
             typeof(T),
             _ => new WriteRepository<T>(_context));
+    }
+
+    public IReadRepository<T> ReadRepository<T>() where T : class
+    {
+        return (IReadRepository<T>)_repositories.GetOrAdd(
+            typeof(T),
+            _ => new ReadRepository<T>(_context));
     }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -41,4 +48,6 @@ public class UnitOfWork : IUnitOfWork
         }
         _disposed = true;
     }
+
+    
 }
