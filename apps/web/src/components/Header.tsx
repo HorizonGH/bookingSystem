@@ -1,12 +1,29 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { authService, User } from '../services/auth';
 
 export function Header() {
-  const [isAuthenticated] = useState(true); // Simulated auth state
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (err) {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-light-darker dark:border-dark-light bg-light/70 dark:bg-dark-light/70 backdrop-blur-xl shadow-sm">
@@ -50,16 +67,16 @@ export function Header() {
           <div className="flex items-center space-x-3">
             <ThemeToggle />
 
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <Link
                 href="/profile"
                 className="flex items-center space-x-2 px-4 py-2 bg-light-darker dark:bg-dark rounded-xl hover:bg-light-darkest dark:hover:bg-dark-lighter transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
-                  JP
+                  {user.firstName[0]}{user.lastName[0]}
                 </div>
                 <span className="hidden sm:inline text-sm font-semibold text-dark dark:text-light">
-                  Juan Pérez
+                  {user.firstName} {user.lastName}
                 </span>
               </Link>
             ) : (

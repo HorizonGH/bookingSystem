@@ -24,6 +24,16 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Add FastEndpoints
 builder.Services.AddFastEndpoints();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Add Swagger with JWT support
 builder.Services.SwaggerDocument(o =>
 {
@@ -48,7 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 // Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
