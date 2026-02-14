@@ -6,13 +6,13 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class UpdateTenantEndpoint : CoreEndpoint<UpdateTenantRequest, TenantDto>
+public class UpdateTenantEndpoint : CoreEndpoint<UpdateTenantCommand, TenantDto>
 {
     public UpdateTenantEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {
-        Put("/tenants");
+        Put("/tenants/{id}");
         AllowAnonymous(); // Adjust authorization as needed
         Description(d => d
             .WithTags("Tenants")
@@ -21,9 +21,9 @@ public class UpdateTenantEndpoint : CoreEndpoint<UpdateTenantRequest, TenantDto>
             .ProducesProblem(404));
     }
 
-    public override async Task HandleAsync(UpdateTenantRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UpdateTenantCommand req, CancellationToken ct)
     {
-        var command = new UpdateTenantCommand { Request = req };
-        Response = await _mediator.Send(command, ct);
+        Response = await _mediator.Send(req, ct);
+        await Send.OkAsync(Response, ct);
     }
 }

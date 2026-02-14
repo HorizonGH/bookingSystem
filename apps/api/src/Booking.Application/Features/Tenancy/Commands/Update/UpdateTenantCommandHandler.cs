@@ -18,13 +18,13 @@ public class UpdateTenantCommandHandler : IRequestHandler<UpdateTenantCommand, T
     public async Task<TenantDto> Handle(UpdateTenantCommand request, CancellationToken cancellationToken)
     {   
         var tenantRepo = _unitOfWork.WriteRepository<Tenant>();
-        var tenant = await tenantRepo.GetByIdAsync(request.Request.Id);
+        var tenant = await tenantRepo.GetByIdAsync(request.Id);
         if (tenant == null)
         {
-            throw new KeyNotFoundException($"Tenant with ID {request.Request.Id} not found.");
+            throw new KeyNotFoundException($"Tenant with ID {request.Id} not found.");
         }
 
-        TenantMapper.UpdateEntity(request.Request, tenant);
+        TenantMapper.UpdateEntity(request, tenant);
         tenant.LastModified = DateTime.UtcNow;
 
         tenantRepo.Update(tenant);
