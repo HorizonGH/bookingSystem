@@ -4,20 +4,21 @@ using Booking.Application.Features.Tenancy.Queries;
 using Booking.Domain.Entities.Tenancy;
 using MediatR;
 
-namespace Booking.Application.Features.Tenancy.Handlers;
+namespace Booking.Application.Features.Tenancy.Queries.GetById;
 
 public class GetTenantByIdQueryHandler : IRequestHandler<GetTenantByIdQuery, TenantDto?>
 {
-    private readonly IReadRepository<Tenant> _tenantRepository;
-
-    public GetTenantByIdQueryHandler(IReadRepository<Tenant> tenantRepository)
+    private readonly IUnitOfWork _unitOfWork;
+    public GetTenantByIdQueryHandler(IUnitOfWork unitOfWork)
     {
-        _tenantRepository = tenantRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<TenantDto?> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
     {
-        var tenant = await _tenantRepository.GetByIdAsync(request.Id);
+        var tenantRepo = _unitOfWork.ReadRepository<Tenant>();
+        var tenant = await tenantRepo.GetByIdAsync(request.Id);
+        
         if (tenant == null)
         {
             return null;

@@ -1,18 +1,14 @@
 using Booking.Application.Common.DTOs.Tenancy;
 using Booking.Application.Features.Tenancy.Queries;
+using Booking.Application.Features.Tenancy.Queries.GetById;
 using FastEndpoints;
 using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class GetTenantByIdEndpoint : EndpointWithoutRequest<TenantDto?>
+public class GetTenantByIdEndpoint : CoreEndpointWithoutRequest<TenantDto?>
 {
-    private readonly IMediator _mediator;
-
-    public GetTenantByIdEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public GetTenantByIdEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

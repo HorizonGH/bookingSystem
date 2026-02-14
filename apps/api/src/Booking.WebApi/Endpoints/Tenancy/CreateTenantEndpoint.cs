@@ -1,18 +1,14 @@
 using Booking.Application.Common.DTOs.Tenancy;
 using Booking.Application.Features.Tenancy.Commands;
+using Booking.Application.Features.Tenancy.Commands.Create;
 using FastEndpoints;
 using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class CreateTenantEndpoint : Endpoint<CreateTenantRequest, TenantDto>
+public class CreateTenantEndpoint : CoreEndpoint<CreateTenantRequest, TenantDto>
 {
-    private readonly IMediator _mediator;
-
-    public CreateTenantEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public CreateTenantEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

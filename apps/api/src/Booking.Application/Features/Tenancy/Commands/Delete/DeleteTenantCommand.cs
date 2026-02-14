@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Booking.Application.Features.Tenancy.Commands;
+namespace Booking.Application.Features.Tenancy.Commands.Delete;
 
 public class DeleteTenantCommand : IRequest<Unit>
 {

@@ -1,18 +1,14 @@
 using Booking.Application.Common.Pagination;
 using Booking.Application.Features.Tenancy.Queries;
+using Booking.Application.Features.Tenancy.Queries.GetAll;
 using FastEndpoints;
 using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class GetAllTenantsEndpoint : Endpoint<PaginationRequest>
+public class GetAllTenantsEndpoint : CoreEndpoint<PaginationRequest>
 {
-    private readonly IMediator _mediator;
-
-    public GetAllTenantsEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public GetAllTenantsEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {

@@ -1,18 +1,14 @@
 using Booking.Application.Common.DTOs.Tenancy;
 using Booking.Application.Features.Tenancy.Commands;
+using Booking.Application.Features.Tenancy.Commands.Update;
 using FastEndpoints;
 using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class UpdateTenantEndpoint : Endpoint<UpdateTenantRequest, TenantDto>
+public class UpdateTenantEndpoint : CoreEndpoint<UpdateTenantRequest, TenantDto>
 {
-    private readonly IMediator _mediator;
-
-    public UpdateTenantEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public UpdateTenantEndpoint(IMediator mediator) : base(mediator) { }
 
     public override void Configure()
     {
