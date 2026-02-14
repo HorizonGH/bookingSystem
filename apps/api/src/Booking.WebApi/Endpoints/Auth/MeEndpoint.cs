@@ -1,16 +1,16 @@
 using Booking.Application.Common.DTOs.Auth;
 using Booking.Application.Common.Interfaces;
+using Booking.Application.Features.Auth.Queries.Me;
 using FastEndpoints;
+using MediatR;
 
 namespace Booking.WebApi.Endpoints.Auth;
 
-public class MeEndpoint : EndpointWithoutRequest<UserDto>
+public class MeEndpoint : CoreEndpointWithoutRequest<GetProfileInfoResponse>
 {
-    private readonly ICurrentUserService _currentUser;
 
-    public MeEndpoint(ICurrentUserService currentUser)
+    public MeEndpoint(IMediator mediator) : base(mediator)
     {
-        _currentUser = currentUser;
     }
 
     public override void Configure()
@@ -25,20 +25,8 @@ public class MeEndpoint : EndpointWithoutRequest<UserDto>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        if (!_currentUser.IsAuthenticated || !_currentUser.UserId.HasValue)
-        {
-            ThrowError("User not authenticated", 401);
-        }
-
-        Response = new UserDto(
-            _currentUser.UserId!.Value,
-            string.Empty,
-            string.Empty,
-            _currentUser.Email ?? string.Empty,
-            string.Empty,
-            _currentUser.TenantId,
-            false,
-            _currentUser.Roles.ToList()
-        );
+        var query = new GetProfileInfoQuery();
+        var result = await _mediator.Send(query, ct);
+        await Send.OkAsync(result, ct);
     }
 }

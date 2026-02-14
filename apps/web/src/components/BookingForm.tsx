@@ -33,7 +33,7 @@ export function BookingForm() {
               Book Your Appointment
             </h2>
             <p className="text-lg text-secondary-600 dark:text-secondary-300">
-              Fill out the form below and we'll get back to you shortly
+              Fill out the form below and we&apos;ll get back to you shortly
             </p>
           </div>
 
