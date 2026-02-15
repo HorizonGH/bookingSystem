@@ -10,10 +10,12 @@ interface ApiResponse<T = any> {
 class ApiError extends Error {
   constructor(
     public message: string,
-    public status: number
+    public status: number,
+    public data?: any
   ) {
     super(message);
     this.name = 'ApiError';
+    this.data = data;
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
@@ -33,9 +35,13 @@ class ApiClient {
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(options.headers as Record<string, string> | undefined),
     };
+
+    // Only set Content-Type for requests with a body (POST, PUT, PATCH)
+    if (options.method && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -52,8 +58,9 @@ class ApiClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new ApiError(
-          errorData.message || `HTTP error! status: ${response.status}`,
-          response.status
+          errorData.message || errorData.title || `HTTP error! status: ${response.status}`,
+          response.status,
+          errorData
         );
       }
 
@@ -75,7 +82,7 @@ class ApiClient {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : undefined, 
     });
   }
 

@@ -91,12 +91,25 @@ public static class QueryableExtensions
             try
             {
                 var property = Expression.Property(parameter, filter.Key);
-                var constant = Expression.Constant(filter.Value);
-                var equal = Expression.Equal(property, Expression.Convert(constant, property.Type));
+                Expression filterExpression;
+
+                // For string properties, use Contains for partial matching
+                if (property.Type == typeof(string))
+                {
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+                    var constant = Expression.Constant(filter.Value.ToString(), typeof(string));
+                    filterExpression = Expression.Call(property, containsMethod, constant);
+                }
+                else
+                {
+                    // For non-string properties, use exact equality
+                    var constant = Expression.Constant(filter.Value);
+                    filterExpression = Expression.Equal(property, Expression.Convert(constant, property.Type));
+                }
 
                 combinedExpression = combinedExpression == null
-                    ? equal
-                    : Expression.AndAlso(combinedExpression, equal);
+                    ? filterExpression
+                    : Expression.AndAlso(combinedExpression, filterExpression);
             }
             catch
             {
