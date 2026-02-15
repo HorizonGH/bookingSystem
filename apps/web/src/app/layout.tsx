@@ -3,6 +3,7 @@
 import "./globals.css";
 import { ThemeProvider } from "../components/ThemeProvider";
 import { Header } from "../components/Header";
+import DialogRenderer from '../components/DialogRenderer';
 
 export default function RootLayout({
   children,
@@ -19,6 +20,8 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           {children}
+          {/* Global dialog renderer (replaces in-app alerts/confirms/prompts) */}
+          <DialogRenderer />
         </ThemeProvider>
       </body>
     </html>

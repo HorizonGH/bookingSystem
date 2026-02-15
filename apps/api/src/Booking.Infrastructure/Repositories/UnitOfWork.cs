@@ -7,7 +7,9 @@ namespace Booking.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly BookingDbContext _context;
-    private readonly ConcurrentDictionary<Type, object> _repositories = new();
+    // Separate caches for read vs write repositories to avoid returning the wrong implementation
+    private readonly ConcurrentDictionary<Type, object> _readRepositories = new();
+    private readonly ConcurrentDictionary<Type, object> _writeRepositories = new();
     private bool _disposed;
 
     public UnitOfWork(BookingDbContext context)
@@ -17,14 +19,14 @@ public class UnitOfWork : IUnitOfWork
 
     public IWriteRepository<T> WriteRepository<T>() where T : class
     {
-        return (IWriteRepository<T>)_repositories.GetOrAdd(
+        return (IWriteRepository<T>)_writeRepositories.GetOrAdd(
             typeof(T),
             _ => new WriteRepository<T>(_context));
     }
 
     public IReadRepository<T> ReadRepository<T>() where T : class
     {
-        return (IReadRepository<T>)_repositories.GetOrAdd(
+        return (IReadRepository<T>)_readRepositories.GetOrAdd(
             typeof(T),
             _ => new ReadRepository<T>(_context));
     }

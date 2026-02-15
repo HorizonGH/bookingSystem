@@ -5,6 +5,9 @@ import { use, useState, useEffect } from 'react';
 import { tenantService, TenantDto } from '../../../../services/tenant';
 import { reservationService, CreateReservationRequest, ReservationStatus } from '../../../../services/reservation';
 import { ApiError } from '../../../../services/api';
+import { WorkerSelector } from '../../../../components/WorkerSelector';
+import { PlanType } from '../../../../services/auth';
+import MessagePopup from '../../../../components/MessagePopup';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -26,6 +29,8 @@ export default function ReservarPage({ params }: PageProps) {
   const [customerPhone, setCustomerPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedWorkerId, setSelectedWorkerId] = useState('');
+  const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null);
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -72,15 +77,27 @@ export default function ReservarPage({ params }: PageProps) {
     setIsSubmitting(true);
 
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      
-      // Create reservation request
+      // Build UTC ISO timestamps from selected local date + selected time so backend always receives UTC
+      const [hStr, mStr] = selectedTime.split(':');
+      const hour = parseInt(hStr, 10) || 0;
+      const minute = parseInt(mStr, 10) || 0;
+      const startUtc = new Date(Date.UTC(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        hour,
+        minute,
+        0
+      )).toISOString();
+      const endUtc = startUtc; // if you need a duration, compute and add minutes here
+
+      // Create reservation request (timestamps in UTC ISO format)
       const reservationData: CreateReservationRequest = {
         tenantId: business.id,
-        serviceId: '', 
-        workerId: '',
-        startTime: `${dateStr}T${selectedTime}:00`,
-        endTime: `${dateStr}T${selectedTime}:00`,
+        serviceId: '2f69dc19-9126-48c2-ad2e-ba2448142c4f',
+        workerId: selectedWorkerId,
+        startTime: startUtc,
+        endTime: endUtc,
         reservationStatus: ReservationStatus.Pending,
         clientName: customerName,
         clientEmail: customerEmail,
@@ -91,7 +108,7 @@ export default function ReservarPage({ params }: PageProps) {
 
       await reservationService.createReservation(reservationData);
       
-      alert('¡Reserva realizada con éxito! Recibirás un email de confirmación.');
+      setPopup({ type: 'success', message: '¡Reserva realizada con éxito! Recibirás un email de confirmación.' });
       
       // Reset form
       setSelectedDate(null);
@@ -101,12 +118,13 @@ export default function ReservarPage({ params }: PageProps) {
       setCustomerPhone('');
       setSpecialRequests('');
       setNumberOfPeople(2);
+      setSelectedWorkerId('');
       
     } catch (err) {
       if (err instanceof ApiError) {
-        alert(`Error al crear la reserva: ${err.message}`);
+        setPopup({ type: 'error', message: `Error al crear la reserva: ${err.message}` });
       } else {
-        alert('Error al crear la reserva. Por favor, inténtalo de nuevo.');
+        setPopup({ type: 'error', message: 'Error al crear la reserva. Por favor, inténtalo de nuevo.' });
       }
     } finally {
       setIsSubmitting(false);
@@ -334,6 +352,14 @@ export default function ReservarPage({ params }: PageProps) {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                      {/* Worker Selection */}
+                      <WorkerSelector
+                        tenantId={business.id}
+                        planType={business.planType ?? PlanType.Free}
+                        selectedWorkerId={selectedWorkerId}
+                        onWorkerSelect={setSelectedWorkerId}
+                      />
+
                       {/* Time & People Row */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -463,6 +489,17 @@ export default function ReservarPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Message popup for success / error */}
+      {popup && (
+        <MessagePopup
+          visible={!!popup}
+          type={popup.type}
+          title={popup.type === 'error' ? 'Error' : popup.type === 'success' ? 'Éxito' : undefined}
+          message={popup.message}
+          onClose={() => setPopup(null)}
+        />
       )}
     </div>
   );
