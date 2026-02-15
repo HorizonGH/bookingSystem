@@ -251,6 +251,21 @@ public class AuthService : IAuthService
 
         _context.UserRoles.Add(userRole);
 
+        // Create worker for the tenant owner (every tenant owner is automatically a worker)
+        var worker = new Worker
+        {
+            UserId = user.Id,
+            TenantId = tenant.Id,
+            JobTitle = "Owner", // Default job title for the owner
+            IsAvailableForBooking = true,
+            Created = DateTime.UtcNow
+        };
+
+        _context.Workers.Add(worker);
+
+        // Update worker count in tenant plan
+        tenantPlan.CurrentWorkers = 1;
+
         await _context.SaveChangesAsync(cancellationToken);
 
         // Generate tokens

@@ -129,6 +129,19 @@ body {
   }
 }
 
+/* Attention animation used by MessagePopup: slight bounce + quick shake to mimic native alert */
+@keyframes alertShake {
+  0% { transform: translateY(0) rotate(0deg); }
+  20% { transform: translateY(-6px) rotate(-1.5deg); }
+  40% { transform: translateY(3px) rotate(1deg); }
+  60% { transform: translateY(-2px) rotate(-0.6deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.animate-alertAttention {
+  animation: slideDown 0.36s cubic-bezier(0.22, 1, 0.36, 1), alertShake 0.48s ease-in-out 0.18s;
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);

@@ -3,14 +3,21 @@
 import { useState } from 'react';
 import { authService, Tenant, PlanType } from '../services/auth';
 import { ApiError } from '../services/api';
+import MessagePopup from './MessagePopup';
 
 interface TenantManagementProps {
   tenant: Tenant;
   tenantId: string;
   onUpdate: (updatedTenant: Tenant) => void;
+  /**
+   * When false, hide the inline "Editar" button and editing controls. Useful
+   * when TenantManagement is rendered inside another page that provides a
+   * dedicated settings flow (e.g. Profile -> Tenant window).
+   */
+  showEditButton?: boolean;
 }
 
-export default function TenantManagement({ tenant, tenantId, onUpdate }: TenantManagementProps) {
+export default function TenantManagement({ tenant, tenantId, onUpdate, showEditButton = true }: TenantManagementProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +30,8 @@ export default function TenantManagement({ tenant, tenantId, onUpdate }: TenantM
     isActive: tenant.isActive
   });
 
+  const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -30,12 +39,12 @@ export default function TenantManagement({ tenant, tenantId, onUpdate }: TenantM
       const updatedTenant = await authService.updateTenant(tenantId, formData);
       onUpdate(updatedTenant);
       setIsEditing(false);
-      alert('Negocio actualizado exitosamente');
+      setPopup({ type: 'success', message: 'Negocio actualizado exitosamente' });
     } catch (err) {
       if (err instanceof ApiError) {
-        alert(`Error: ${err.message}`);
+        setPopup({ type: 'error', message: `Error: ${err.message}` });
       } else {
-        alert('Error al actualizar el negocio');
+        setPopup({ type: 'error', message: 'Error al actualizar el negocio' });
       }
     } finally {
       setIsLoading(false);
@@ -72,7 +81,7 @@ export default function TenantManagement({ tenant, tenantId, onUpdate }: TenantM
           <span className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-secondary-500"></span>
           Mi Negocio
         </h2>
-        {!isEditing && (
+        {!isEditing && showEditButton && (
           <button
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors text-sm font-medium"
@@ -251,6 +260,17 @@ export default function TenantManagement({ tenant, tenantId, onUpdate }: TenantM
             )}
           </div>
         </div>
+      )}
+
+      {/* Message popup */}
+      {popup && (
+        <MessagePopup
+          visible={!!popup}
+          type={popup.type}
+          title={popup.type === 'error' ? 'Error' : popup.type === 'success' ? 'Éxito' : undefined}
+          message={popup.message}
+          onClose={() => setPopup(null)}
+        />
       )}
     </div>
   );

@@ -15,6 +15,8 @@ export interface TenantDto {
   country?: string;
   postalCode?: string;
   businessHours?: string;
+  planType?: number; // 0: Free, 1: Basic, 2: Professional, 3: Enterprise
+  isActive?: boolean;
 }
 
 export interface CreateTenantRequest {
