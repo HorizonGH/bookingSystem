@@ -8,7 +8,6 @@ public class CreateReservationCommand : IRequest<ReservationDto>
     public Guid? TenantId { get; set; }
     public Guid ServiceId { get; set; }
     public Guid WorkerId { get; set; }
-    public Guid ClientId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public decimal Price { get; set; }

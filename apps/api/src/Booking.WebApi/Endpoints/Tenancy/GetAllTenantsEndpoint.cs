@@ -1,6 +1,7 @@
 using Booking.Application.Common.Pagination;
 using Booking.Application.Features.Tenancy.Queries;
 using Booking.Application.Features.Tenancy.Queries.GetAll;
+using Booking.WebApi.Binders;
 using FastEndpoints;
 using MediatR;
 
@@ -14,6 +15,7 @@ public class GetAllTenantsEndpoint : CoreEndpoint<PaginationRequest>
     {
         Get("/tenants");
         AllowAnonymous(); // Adjust authorization as needed
+        RequestBinder(new PaginationRequestBinder());
         Description(d => d
             .WithTags("Tenants")
             .WithSummary("Get all tenants with pagination, search, filtering, and sorting")
@@ -25,7 +27,7 @@ public class GetAllTenantsEndpoint : CoreEndpoint<PaginationRequest>
                 - searchTerm: Search across name, slug, description, email, city, and country
                 - sortBy: Property name to sort by (e.g., 'Name', 'Email', 'Created')
                 - sortDescending: Sort in descending order (default: false)
-                - filters: Generic key-value pairs for filtering (e.g., filters.status=active, filters.isActive=true)")
+                - filters: Generic key-value pairs for filtering (e.g., filters.name=Alice, filters.status=active)")
             .Produces(200));
     }
 

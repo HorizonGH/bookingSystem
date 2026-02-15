@@ -27,10 +27,10 @@ public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Pag
             [
                 t => t.Name,
                 t => t.Slug,
-                t => t.Description ?? string.Empty,
-                t => t.Email ?? string.Empty,
-                t => t.City ?? string.Empty,
-                t => t.Country ?? string.Empty
+                t => t.Description,
+                t => t.Email,
+                t => t.City,
+                t => t.Country
             ]);
 
         var pagedResult = await query.ToPagedResultAsync(
