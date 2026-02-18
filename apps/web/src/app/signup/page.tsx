@@ -1,17 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { authService, PlanType } from '../../services/auth';
 import { ApiError } from '../../services/api';
 import SignupStage1 from '../../components/SignupStage1';
 import SignupStage2 from '../../components/SignupStage2';
 import SignupStage3 from '../../components/SignupStage3';
+import { planService, PlanDto } from '../../services/plan';
 
 type SignupStage = 1 | 2 | 3;
 
 const getMaxWorkersByPlan = (plan: PlanType): number => {
   switch (plan) {
+    case PlanType.Free:
+      return 1;
     case PlanType.Basic:
       return 3;
     case PlanType.Professional:
@@ -38,6 +41,75 @@ export default function SignupPage() {
 
   // Stage 2 - Plan selection
   const [selectedPlan, setSelectedPlan] = useState<PlanType>(PlanType.Basic);
+
+  // API-driven plan options (converted to the small shape used by the stage component)
+  const [availablePlans, setAvailablePlans] = useState<{
+    type: PlanType;
+    name: string;
+    description: string;
+    price: string;
+    features: string[];
+    maxWorkers: number;
+  }[] | null>(null);
+
+  // Load plans from backend and map into the small PlanOption shape used by SignupStage2
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const apiPlans = await planService.getPlans();
+        const grouped = new Map<number, PlanDto[]>();
+        apiPlans.forEach((p) => {
+          const pt = Number(p.planType ?? 0);
+          if (!grouped.has(pt)) grouped.set(pt, []);
+          grouped.get(pt)!.push(p);
+        });
+
+        const mapped = [0, 1, 2, 3]
+          .map((pt) => {
+            const entries = grouped.get(pt);
+            if (!entries || entries.length === 0) return null;
+            const entry = entries.find((e) => e.billingCycle && e.billingCycle.toLowerCase().includes('month')) ?? entries[0];
+
+            const safeMaxWorkers = entry.maxWorkers === -1 ? Infinity : entry.maxWorkers;
+            const safeMaxServices = entry.maxServices === -1 ? Infinity : entry.maxServices;
+
+            return {
+              type: pt as PlanType,
+              name: entry.name || (pt === 0 ? 'Gratis' : pt === 1 ? 'Básico' : pt === 2 ? 'Profesional' : 'Empresa'),
+              description: entry.description || '',
+              price: entry.price === 0 ? 'Gratis' : `${entry.price ?? 0}€`,
+              features: [
+                safeMaxWorkers !== undefined && safeMaxWorkers !== null ? (safeMaxWorkers === Infinity ? 'Trabajadores ilimitados' : `${safeMaxWorkers} trabajadores`) : '',
+                safeMaxServices !== undefined && safeMaxServices !== null ? (safeMaxServices === Infinity ? 'Servicios ilimitados' : `${safeMaxServices} servicios`) : '',
+                entry.hasApiAccess ? 'API' : ''
+              ].filter(Boolean),
+              maxWorkers: safeMaxWorkers ?? (pt === 0 ? 1 : pt === 1 ? 3 : pt === 2 ? 10 : Infinity)
+            };
+          })
+          .filter(Boolean) as any;
+
+        if (mounted && mapped.length) setAvailablePlans(mapped);
+      } catch (err) {
+        console.warn('Failed to load signup plans from API, falling back to local options', err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  // If a planType query param is provided (e.g. from Pricing), pre-select that plan
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('planType');
+      if (q) {
+        const n = parseInt(q, 10);
+        if (!Number.isNaN(n) && n >= 0 && n <= 3) setSelectedPlan(n as PlanType);
+      }
+    } catch (err) {
+      /* ignore in non-browser environments */
+    }
+  }, []);
 
   // Stage 3 - Tenant info
   const [tenantName, setTenantName] = useState('');
@@ -261,6 +333,7 @@ export default function SignupPage() {
                 onBack={handleBack}
                 onNext={handleStage2Submit}
                 isLoading={isLoading}
+                plans={availablePlans ?? undefined}
               />
             )}
 

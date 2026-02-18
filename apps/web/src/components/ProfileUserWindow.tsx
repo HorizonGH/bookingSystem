@@ -7,15 +7,15 @@ export default function ProfileUserWindow({ user }: { user: User }) {
   const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
 
   return (
-    <div className="bg-white dark:bg-dark-light rounded-2xl shadow-xl p-8 border border-light-darker dark:border-secondary-700 backdrop-blur-sm relative overflow-hidden group hover:border-primary-500/30 transition-all duration-300">
+    <div className="bg-white dark:bg-dark-light rounded-2xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700 backdrop-blur-sm relative overflow-hidden group hover:border-primary-500/30 transition-all duration-300">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/10 to-secondary-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110 duration-500" />
 
       <div className="relative z-10 text-center">
-        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-primary-500/20 ring-4 ring-white dark:ring-dark-light">
+        <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-full flex items-center justify-center text-white text-2xl md:text-3xl font-bold shadow-lg shadow-primary-500/20 ring-4 ring-white dark:ring-dark-light">
           {initials}
         </div>
 
-        <h2 className="text-2xl font-bold text-center text-dark dark:text-light mb-1">
+        <h2 className="text-xl md:text-2xl font-bold text-center text-dark dark:text-light mb-1">
           {user.firstName} {user.lastName}
         </h2>
         <p className="text-center text-secondary-500 mb-6 text-sm font-medium uppercase tracking-wide">
@@ -44,7 +44,7 @@ export default function ProfileUserWindow({ user }: { user: User }) {
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-light-darker dark:border-secondary-800/50">
+        <div className="mt-6 md:mt-8 pt-6 border-t border-light-darker dark:border-secondary-800/50">
           <button
             onClick={() => {
               authService.logout();
@@ -61,7 +61,7 @@ export default function ProfileUserWindow({ user }: { user: User }) {
 
         {/* Reservations (moved here from profile page) */}
         <div className="mt-8">
-          <div className="bg-white/50 dark:bg-dark-light/30 rounded-3xl border border-light-darker dark:border-secondary-700/50 p-6 md:p-8 backdrop-blur-sm">
+          <div className="bg-white/50 dark:bg-dark-light/30 rounded-3xl border border-light-darker dark:border-secondary-700/50 p-4 md:p-8 backdrop-blur-sm">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-dark dark:text-light flex items-center gap-2">
                 <span className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-secondary-500"></span>
@@ -86,7 +86,7 @@ export default function ProfileUserWindow({ user }: { user: User }) {
             ) : (
               <div className="space-y-4">
                 {user.reservations.map((reservation) => (
-                  <div key={reservation.id} className="bg-white dark:bg-dark-light rounded-2xl shadow-md p-5 border border-light-darker dark:border-secondary-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300 group">
+                  <div key={reservation.id} className="bg-white dark:bg-dark-light rounded-2xl shadow-md p-3 md:p-5 border border-light-darker dark:border-secondary-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300 group">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:scale-110 transition-transform">

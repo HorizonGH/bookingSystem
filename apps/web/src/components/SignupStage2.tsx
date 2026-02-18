@@ -17,9 +17,22 @@ interface SignupStage2Props {
   onBack: () => void;
   onNext: () => void;
   isLoading: boolean;
+  plans?: PlanOption[]; // optional — parent can provide API-driven plans
 }
 
 const PLANS: PlanOption[] = [
+  {
+    type: PlanType.Free,
+    name: 'Gratis',
+    description: 'Comienza gratis con funcionalidades básicas',
+    price: 'Gratis',
+    features: [
+      '1 trabajador',
+      'Hasta 5 reservas/mes',
+      'Gestión de reservas básica'
+    ],
+    maxWorkers: 1
+  },
   {
     type: PlanType.Basic,
     name: 'Básico',
@@ -69,7 +82,8 @@ export default function SignupStage2({
   onPlanChange,
   onBack,
   onNext,
-  isLoading
+  isLoading,
+  plans
 }: SignupStage2Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +98,7 @@ export default function SignupStage2({
         </h3>
 
         <div className="grid gap-3 md:grid-cols-3">
-          {PLANS.map((plan) => (
+          {(plans ?? PLANS).map((plan) => (
             <button
               key={plan.type}
               type="button"
@@ -115,7 +129,7 @@ export default function SignupStage2({
                 <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
                   {plan.price}
                 </span>
-                {plan.price !== 'Personalizado' && (
+                {plan.price !== 'Personalizado' && plan.price !== 'Gratis' && (
                   <span className="text-xs text-secondary-500 dark:text-secondary-400 ml-1">
                     /mes
                   </span>

@@ -82,7 +82,15 @@ export const tenantService = {
    * Get a tenant by ID
    */
   async getTenantById(id: string): Promise<TenantDto> {
-    return apiClient.get<TenantDto>(`/tenants/${id}`);
+    // Support both legacy raw TenantDto response and the new wrapper { tenant: TenantDto, plan: TenantPlanInfoDto }
+    const res = await apiClient.get<any>(`/tenants/${id}`);
+    const tenant = res?.tenant ?? res;
+
+    if (res?.plan && (tenant.planType === undefined || tenant.planType === null)) {
+      tenant.planType = res.plan.planType;
+    }
+
+    return tenant as TenantDto;
   },
 
   /**

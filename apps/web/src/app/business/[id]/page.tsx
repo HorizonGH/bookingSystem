@@ -83,14 +83,14 @@ export default function BusinessDetailPage({ params }: PageProps) {
         <>
 
       {/* Hero Image Section */}
-      <div className="relative h-[500px]"> 
+      <div className="relative h-[280px] md:h-[500px]"> 
         {/* Placeholder Gradient instead of heavy image */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-dark to-dark-light"></div>
          {/* Decorative pattern/blob on top of hero */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-light dark:from-dark via-transparent to-transparent"></div> {/* Fade to bottom */}
 
-        <div className="container mx-auto px-4 h-full relative z-10 pt-8 flex flex-col justify-between pb-32">
+        <div className="container mx-auto px-4 h-full relative z-10 pt-6 flex flex-col justify-between pb-12 md:pb-32">
           {/* Nav */}
           <Link 
             href="/search"
@@ -114,11 +114,11 @@ export default function BusinessDetailPage({ params }: PageProps) {
                 </span>
               </div>
               
-              <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 drop-shadow-xl animate-slideUp" style={{animationDelay: '100ms'}}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-3 md:mb-6 drop-shadow-xl animate-slideUp" style={{animationDelay: '100ms'}}>
                   {business.name}
               </h1>
               
-              <div className="flex flex-wrap items-center gap-6 text-white/90 font-medium animate-slideUp" style={{animationDelay: '200ms'}}>
+              <div className="hidden sm:flex flex-wrap items-center gap-3 md:gap-6 text-white/90 font-medium animate-slideUp" style={{animationDelay: '200ms'}}>
                  <div className="flex items-center gap-1.5">
                     <svg className="w-6 h-6 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                     <span>{business.city || 'Ubicación no especificada'}</span>
@@ -136,7 +136,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-24 pb-20 relative z-20">
+      <div className="container mx-auto px-4 -mt-10 md:-mt-24 pb-12 md:pb-20 relative z-20">
         <div className="max-w-7xl mx-auto">
           <div className="lg:flex lg:gap-8">
             
@@ -144,12 +144,12 @@ export default function BusinessDetailPage({ params }: PageProps) {
             <div className="lg:flex-1 mb-8 lg:mb-0 space-y-8 animate-slideUp" style={{animationDelay: '300ms'}}>
               
               {/* Description & Contact Card */}
-              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-8 border border-light-darker dark:border-secondary-700/50 backdrop-blur-sm">
-                <h3 className="text-2xl font-bold text-dark dark:text-light mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700/50 backdrop-blur-sm">
+                <h3 className="text-xl md:text-2xl font-bold text-dark dark:text-light mb-3 md:mb-4 flex items-center gap-2">
                     <span className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-secondary-500"></span>
                     Sobre nosotros
                 </h3>
-                <p className="text-lg text-secondary-600 dark:text-secondary-400 leading-relaxed mb-8">
+                <p className="text-sm md:text-lg text-secondary-600 dark:text-secondary-400 leading-relaxed mb-4 md:mb-8">
                   {business.description}
                 </p>
 
@@ -174,9 +174,9 @@ export default function BusinessDetailPage({ params }: PageProps) {
 
             {/* Reservation Card Sidebar */}
             <div className="lg:w-[400px] animate-slideUp" style={{animationDelay: '400ms'}}>
-              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-2xl p-8 sticky top-24 border border-light-darker dark:border-secondary-700/50">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-dark dark:text-light">
+              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-2xl p-5 md:p-8 sticky top-24 border border-light-darker dark:border-secondary-700/50">
+                <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold text-dark dark:text-light">
                     Hacer una Reserva
                     </h2>
                     <span className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center text-primary-600">
@@ -184,12 +184,12 @@ export default function BusinessDetailPage({ params }: PageProps) {
                     </span>
                 </div>
 
-                <p className="text-secondary-600 dark:text-secondary-400 mb-8 leading-relaxed">
+                <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-4 md:mb-8 leading-relaxed">
                   Consulta la disponibilidad en nuestro calendario y selecciona el mejor horario para tu reserva.
                 </p>
 
                 {/* Features List */}
-                <div className="space-y-4 mb-8">
+                <div className="space-y-3 mb-4 md:mb-8">
                   {[
                     { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, text: 'Confirmación inmediata' },
                     { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>, text: 'Disponibilidad en tiempo real' },

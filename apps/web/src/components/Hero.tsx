@@ -62,7 +62,7 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative overflow-hidden pt-20 pb-20 lg:pt-32 lg:pb-28 bg-light dark:bg-dark">
+    <section className="relative overflow-hidden pt-12 pb-12 md:pt-20 md:pb-20 lg:pt-32 lg:pb-28 bg-light dark:bg-dark">
       {/* Abstract Background Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary-500/10 rounded-full blur-[100px] opacity-40 animate-float" />
@@ -84,7 +84,7 @@ export function Hero() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-dark dark:text-light mb-6 leading-[1.1]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-dark dark:text-light mb-4 md:mb-6 leading-[1.1]">
               Gestión de reservas <br className="hidden lg:block"/>
               <span className="bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
                 sin complicaciones
@@ -178,11 +178,11 @@ export function Hero() {
         </div>
 
         {/* Features List (Added) */}
-        <div className="mt-24 pt-10 border-t border-light-darker dark:border-secondary-800/50">
-          <p className="text-center text-sm font-semibold text-secondary-400 uppercase tracking-widest mb-12">
+        <div className="mt-12 md:mt-24 pt-10 border-t border-light-darker dark:border-secondary-800/50">
+          <p className="text-center text-sm font-semibold text-secondary-400 uppercase tracking-widest mb-6 md:mb-12">
             Todo lo que necesitas
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {features.map((feature, index) => (
               <div 
                 key={index} 

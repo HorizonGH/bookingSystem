@@ -141,7 +141,16 @@ export const authService = {
   },
 
   async getTenant(tenantId: string): Promise<Tenant> {
-    return apiClient.get<Tenant>(`/tenants/${tenantId}`);
+    // The backend may return either a raw Tenant DTO or a wrapper { tenant: TenantDto, plan: TenantPlanInfoDto }
+    const res = await apiClient.get<any>(`/tenants/${tenantId}`);
+    const tenant = res?.tenant ?? res;
+
+    // If plan info is returned separately, ensure `planType` is available on the tenant object
+    if (res?.plan && (tenant.planType === undefined || tenant.planType === null)) {
+      tenant.planType = res.plan.planType;
+    }
+
+    return tenant as Tenant;
   },
 
   async updateTenant(tenantId: string, tenantData: Partial<Omit<Tenant, 'id' | 'created' | 'lastModified'>>): Promise<Tenant> {
