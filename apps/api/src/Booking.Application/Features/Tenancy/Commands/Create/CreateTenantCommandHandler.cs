@@ -17,7 +17,7 @@ public class CreateTenantCommandHandler : IRequestHandler<CreateTenantCommand, T
 
     public async Task<TenantDto> Handle(CreateTenantCommand request, CancellationToken cancellationToken)
     {
-        var tenant = TenantMapper.ToEntity(request.Request);
+        var tenant = TenantMapper.ToEntity(request);
         tenant.Created = DateTime.UtcNow;
 
         var tenantRepo = _unitOfWork.WriteRepository<Tenant>();

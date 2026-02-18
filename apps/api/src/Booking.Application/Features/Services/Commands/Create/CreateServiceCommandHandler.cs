@@ -19,7 +19,6 @@ public class CreateServiceCommandHandler : IRequestHandler<CreateServiceCommand,
 
     public async Task<ServiceDto> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
     {
-        var req = request.Request;
         var tenantId = request.TenantId;
         if (tenantId == Guid.Empty)
             throw new InvalidOperationException("TenantId is required");
@@ -52,17 +51,17 @@ public class CreateServiceCommandHandler : IRequestHandler<CreateServiceCommand,
         var service = new Service
         {
             TenantId = tenantId,
-            Name = req.Name,
-            Description = req.Description,
-            DurationMinutes = req.DurationMinutes,
-            Price = req.Price,
-            ImageUrl = req.ImageUrl,
-            Category = req.Category,
-            BufferTimeBefore = req.BufferTimeBefore,
-            BufferTimeAfter = req.BufferTimeAfter,
-            RequiresApproval = req.RequiresApproval,
-            MaxAdvanceBookingDays = req.MaxAdvanceBookingDays,
-            MinAdvanceBookingHours = req.MinAdvanceBookingHours,
+            Name = request.Name,
+            Description = request.Description,
+            DurationMinutes = request.DurationMinutes,
+            Price = request.Price,
+            ImageUrl = request.ImageUrl,
+            Category = request.Category,
+            BufferTimeBefore = request.BufferTimeBefore,
+            BufferTimeAfter = request.BufferTimeAfter,
+            RequiresApproval = request.RequiresApproval,
+            MaxAdvanceBookingDays = request.MaxAdvanceBookingDays,
+            MinAdvanceBookingHours = request.MinAdvanceBookingHours,
             Created = DateTime.UtcNow
         };
 

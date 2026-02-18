@@ -1,16 +1,13 @@
-using Booking.Application.Common.DTOs.Tenancy;
-using Booking.Application.Common.Interfaces;
-using Booking.Domain.Entities.Tenancy;
+using Booking.Application.Features.Tenancy.Commands.Create;
+using FastEndpoints;
 using FluentValidation;
 
 namespace Booking.Application.Common.Validators.Tenancy;
 
-public class CreateTenantRequestValidator : AbstractValidator<CreateTenantRequest>
+public class CreateTenantCommandValidator : Validator<CreateTenantCommand>
 {
-
-    public CreateTenantRequestValidator()
+    public CreateTenantCommandValidator()
     {
-
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
             .Length(1, 100).WithMessage("Name must be between 1 and 100 characters.");
@@ -55,7 +52,9 @@ public class CreateTenantRequestValidator : AbstractValidator<CreateTenantReques
 
         RuleFor(x => x.PostalCode)
             .MaximumLength(20).WithMessage("Postal code must not exceed 20 characters.");
+        
+        RuleFor(x => x.AllowedScheduleDays)
+            .Matches(@"^[0-6](,[0-6])*$")
+            .WithMessage("AllowedScheduleDays must be comma-separated numbers 0-6 (0=Sunday, 6=Saturday).");
     }
-
-
 }

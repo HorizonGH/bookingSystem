@@ -28,18 +28,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       if (isLogin) {
         const response = await authService.login({ email, password });
-        // Store tokens in localStorage
-        localStorage.setItem('authToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('expiresAt', response.expiresAt);
         console.log('Login successful:', response.user);
         onClose();
       } else {
         const response = await authService.register({ firstName, lastName, email, password, phoneNumber: phoneNumber || undefined });
-        // Store tokens in localStorage
-        localStorage.setItem('authToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('expiresAt', response.expiresAt);
         console.log('Registration successful:', response.user);
         onClose();
       }

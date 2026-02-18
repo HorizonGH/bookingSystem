@@ -5,8 +5,10 @@ namespace Booking.Application.Features.Workers.Commands.Create;
 
 public class CreateWorkerCommand : IRequest<WorkerDto>
 {
-    public CreateWorkerRequest Request { get; set; } = null!;
-
-    // TenantId is copied from the incoming request to make handler validations explicit
+    public Guid UserId { get; set; }
     public Guid TenantId { get; set; }
+    public string? JobTitle { get; set; }
+    public string? Bio { get; set; }
+    public string? ProfileImageUrl { get; set; }
+    public bool IsAvailableForBooking { get; set; } = true;
 }

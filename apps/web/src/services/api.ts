@@ -1,4 +1,6 @@
 // Base API configuration and utilities
+import { tokenStorage } from '../lib/tokenStorage';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5017/api';
 
 interface ApiResponse<T = any> {
@@ -22,9 +24,71 @@ class ApiError extends Error {
 
 class ApiClient {
   private baseURL: string;
+  private isRefreshing: boolean = false;
+  private refreshQueue: Array<() => void> = [];
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+  }
+
+  /**
+   * Queue requests while token is being refreshed
+   * to avoid multiple simultaneous refresh requests
+   */
+  private onTokenRefresh(callback: () => void): void {
+    this.refreshQueue.push(callback);
+  }
+
+  /**
+   * Execute all queued requests after token refresh
+   */
+  private processQueue(): void {
+    this.refreshQueue.forEach((callback) => callback());
+    this.refreshQueue = [];
+  }
+
+  /**
+   * Attempt to refresh the access token
+   */
+  private async attemptTokenRefresh(): Promise<boolean> {
+    const refreshToken = tokenStorage.getRefreshToken();
+    const accessToken = tokenStorage.getAccessToken();
+
+    if (!refreshToken || !accessToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${this.baseURL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken, refreshToken }),
+      });
+
+      if (!response.ok) {
+        // Refresh failed, tokens are invalid
+        tokenStorage.clearTokens();
+        return false;
+      }
+
+      const data = await response.json();
+      
+      if (data.accessToken) {
+        // Save the new access token
+        tokenStorage.updateAccessToken(data.accessToken);
+        if (data.refreshToken) {
+          tokenStorage.saveTokens(data.accessToken, data.refreshToken);
+        }
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return false;
+    }
   }
 
   private async request<T>(
@@ -33,7 +97,8 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    // Get the current access token
+    const token = tokenStorage.getAccessToken();
     const headers: Record<string, string> = {
       ...(options.headers as Record<string, string> | undefined),
     };
@@ -53,10 +118,82 @@ class ApiClient {
     };
 
     try {
-      const response = await fetch(url, config);
+      let response = await fetch(url, config);
+
+      // Handle 401 Unauthorized - attempt token refresh
+      if (response.status === 401 && typeof window !== 'undefined') {
+        // If already refreshing, queue this request
+        if (this.isRefreshing) {
+          return new Promise((resolve, reject) => {
+            this.onTokenRefresh(() => {
+              // Retry the request with new token
+              this.request<T>(endpoint, options)
+                .then(resolve)
+                .catch(reject);
+            });
+          });
+        }
+
+        this.isRefreshing = true;
+
+        // Attempt to refresh the token
+        const refreshed = await this.attemptTokenRefresh();
+
+        if (refreshed) {
+          // Token refresh successful, retry the original request
+          const newToken = tokenStorage.getAccessToken();
+          if (newToken) {
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${newToken}`,
+            };
+
+            try {
+              response = await fetch(url, config);
+              
+              // If still 401 after refresh, logout
+              if (response.status === 401) {
+                tokenStorage.clearTokens();
+                if (window.location.pathname !== '/login') {
+                  const currentPath = window.location.pathname + window.location.search;
+                  window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+                }
+                throw new ApiError('Unauthorized', 401, {});
+              }
+            } finally {
+              this.isRefreshing = false;
+              this.processQueue();
+            }
+          } else {
+            this.isRefreshing = false;
+            this.processQueue();
+            throw new ApiError('Invalid token after refresh', 401, {});
+          }
+        } else {
+          // Token refresh failed, clear tokens and redirect to login
+          this.isRefreshing = false;
+          this.processQueue();
+
+          if (typeof window !== 'undefined') {
+            try {
+              tokenStorage.clearTokens();
+            } catch (e) {
+              // ignore storage errors
+            }
+
+            const currentPath = window.location.pathname + window.location.search;
+            if (window.location.pathname !== '/login') {
+              window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+            }
+          }
+
+          throw new ApiError('Token refresh failed', 401, {});
+        }
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
         throw new ApiError(
           errorData.message || errorData.title || `HTTP error! status: ${response.status}`,
           response.status,

@@ -1,14 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export function Hero() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   const features = [
     {
@@ -76,7 +70,7 @@ export function Hero() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           
           {/* Text Content */}
           <div className="flex-1 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
