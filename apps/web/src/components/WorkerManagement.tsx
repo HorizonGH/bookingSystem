@@ -13,6 +13,7 @@ import {
 import MessagePopup from './MessagePopup';
 import { User, PlanType } from '../services/auth';
 import { ApiError } from '../services/api';
+import WorkerScheduleManagement from './WorkerScheduleManagement';
 
 interface WorkerManagementProps {
   tenantId: string;
@@ -29,6 +30,9 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWorker, setEditingWorker] = useState<WorkerDto | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Schedule management state
+  const [scheduleWorker, setScheduleWorker] = useState<WorkerDto | null>(null);
 
   // Error / message popup
   const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string; title?: string } | null>(null);
@@ -339,6 +343,12 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                 {/* Actions */}
                 <div className="flex flex-col gap-2 flex-shrink-0">
                   <button
+                    onClick={() => setScheduleWorker(worker)}
+                    className="px-3 py-1.5 text-xs font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                  >
+                    📅 Horarios
+                  </button>
+                  <button
                     onClick={() => openEditModal(worker)}
                     className="px-3 py-1.5 text-xs font-medium bg-white dark:bg-dark border border-secondary-300 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-colors"
                   >
@@ -498,6 +508,37 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Management Modal */}
+      {scheduleWorker && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-light-darker dark:border-secondary-700">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-primary-500 to-secondary-600 px-6 py-4 text-white rounded-t-2xl flex items-center justify-between">
+              <h3 className="text-xl font-bold">
+                Gestionar Horarios - {getWorkerDisplayName(scheduleWorker)}
+              </h3>
+              <button
+                onClick={() => setScheduleWorker(null)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <WorkerScheduleManagement
+                tenantId={tenantId}
+                workerId={scheduleWorker.id}
+                workerName={getWorkerDisplayName(scheduleWorker)}
+              />
+            </div>
           </div>
         </div>
       )}

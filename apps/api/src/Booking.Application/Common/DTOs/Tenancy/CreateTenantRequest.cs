@@ -46,4 +46,11 @@ public class CreateTenantRequest
     public string? PostalCode { get; set; }
 
     public string? BusinessHours { get; set; }
+    
+    // Default Schedule Constraints (with defaults for Monday-Saturday 9 AM - 6 PM)
+    public TimeSpan DefaultScheduleStartTime { get; set; } = new TimeSpan(9, 0, 0);
+    public TimeSpan DefaultScheduleEndTime { get; set; } = new TimeSpan(18, 0, 0);
+    
+    [RegularExpression(@"^[0-6](,[0-6])*$", ErrorMessage = "AllowedScheduleDays must be comma-separated numbers 0-6 (0=Sunday, 6=Saturday).")]
+    public string AllowedScheduleDays { get; set; } = "1,2,3,4,5,6";
 }

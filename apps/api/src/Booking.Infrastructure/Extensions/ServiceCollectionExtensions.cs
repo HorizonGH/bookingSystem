@@ -47,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IWorkerAvailabilityService, WorkerAvailabilityService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         // Register repositories and Unit of Work

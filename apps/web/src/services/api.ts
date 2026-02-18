@@ -38,8 +38,8 @@ class ApiClient {
       ...(options.headers as Record<string, string> | undefined),
     };
 
-    // Only set Content-Type for requests with a body (POST, PUT, PATCH)
-    if (options.method && ['POST', 'PUT', 'PATCH'].includes(options.method)) {
+    // Only set Content-Type for requests with a body (POST, PUT, PATCH, DELETE)
+    if (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) && options.body) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -94,8 +94,12 @@ class ApiClient {
     });
   }
 
-  async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  async delete<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { 
+      ...options, 
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
 }
 

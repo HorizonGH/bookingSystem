@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import TenantManagement from '../../../../components/TenantManagement';
 import WorkerManagement from '../../../../components/WorkerManagement';
+import ServiceManagement from '../../../../components/ServiceManagement';
 import { authService, Tenant, User } from '../../../../services/auth';
 import { ApiError } from '../../../../services/api';
 
@@ -73,10 +74,18 @@ export default function BusinessSettingsPage() {
         )}
 
         {isTenantAdmin && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
+          <div className="space-y-8">
+            {/* Tenant & Services Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
+              </div>
+              <div>
+                <ServiceManagement tenantId={tenant.id} planType={tenant.planType} />
+              </div>
             </div>
+            
+            {/* Workers Row */}
             <div>
               <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
             </div>

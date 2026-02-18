@@ -19,4 +19,9 @@ public class UpdateTenantCommand : IRequest<TenantDto>
     public string? Country { get; set; }
     public string? PostalCode { get; set; }
     public string? BusinessHours { get; set; }
+    
+    // Default Schedule Constraints
+    public TimeSpan DefaultScheduleStartTime { get; set; }
+    public TimeSpan DefaultScheduleEndTime { get; set; }
+    public string AllowedScheduleDays { get; set; } = string.Empty;
 }

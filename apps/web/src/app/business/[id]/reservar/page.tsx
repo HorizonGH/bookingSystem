@@ -8,6 +8,8 @@ import { ApiError } from '../../../../services/api';
 import { WorkerSelector } from '../../../../components/WorkerSelector';
 import { PlanType } from '../../../../services/auth';
 import MessagePopup from '../../../../components/MessagePopup';
+import { scheduleService, TimeSlotDto, WorkerScheduleDto, formatDateToYYYYMMDD } from '../../../../services/schedule';
+import { serviceService, ServiceDto } from '../../../../services/service';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,22 +33,19 @@ export default function ReservarPage({ params }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedWorkerId, setSelectedWorkerId] = useState('');
   const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null);
+
+  // Services (for booking) and selected service
+  const [services, setServices] = useState<ServiceDto[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState('');
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlotDto[]>([]);
+  const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
 
-  // Mock unavailable dates (for demo purposes)
-  const unavailableDates = [
-    '2026-02-17', '2026-02-18', '2026-02-24', '2026-02-25',
-    '2026-03-03', '2026-03-10', '2026-03-17', '2026-03-24', '2026-03-31'
-  ];
-
-  const availableTimes = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
-    '21:00', '21:30', '22:00', '22:30', '23:00'
-  ];
+  // Schedules for the selected worker (fetched from API) — used to mark calendar availability
+  const [workerSchedules, setWorkerSchedules] = useState<WorkerScheduleDto[]>([]);
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
 
   // Fetch business data
   useEffect(() => {
@@ -70,6 +69,90 @@ export default function ReservarPage({ params }: PageProps) {
     fetchBusiness();
   }, [businessId]);
 
+  // Fetch services for this tenant (used in booking form)
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!business) return;
+      try {
+        setIsLoadingServices(true);
+        const res = await serviceService.getServicesByTenant(business.id);
+        setServices(res.services || []);
+        if ((res.services || []).length === 1) setSelectedServiceId(res.services![0].id);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      } finally {
+        setIsLoadingServices(false);
+      }
+    };
+    fetchServices();
+  }, [business]);
+
+  // Fetch available time slots when worker and date are selected
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      if (!business || !selectedDate || !selectedWorkerId) {
+        setAvailableTimeSlots([]);
+        return;
+      }
+
+      try {
+        setIsLoadingTimeSlots(true);
+        const dateStr = formatDateToYYYYMMDD(selectedDate);
+        const selectedService = services.find(s => s.id === selectedServiceId);
+        const slotDuration = selectedService ? selectedService.durationMinutes : 60;
+        const slots = await scheduleService.getAvailableTimeSlots(
+          business.id,
+          selectedWorkerId,
+          {
+            date: dateStr,
+            serviceId: selectedServiceId || undefined,
+            slotDurationMinutes: slotDuration,
+          }
+        );
+        setAvailableTimeSlots(slots);
+      } catch (err) {
+        console.error('Error fetching time slots:', err);
+        setAvailableTimeSlots([]);
+        if (err instanceof ApiError) {
+          setPopup({ 
+            type: 'error', 
+            message: `Error al cargar horarios disponibles: ${err.message}` 
+          });
+        }
+      } finally {
+        setIsLoadingTimeSlots(false);
+      }
+    };
+
+    fetchTimeSlots();
+  }, [business, selectedDate, selectedWorkerId, selectedServiceId, services]);
+
+  // Fetch worker schedules (recurring + overrides) when a worker is selected
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      if (!business || !selectedWorkerId) {
+        setWorkerSchedules([]);
+        return;
+      }
+
+      try {
+        setIsLoadingSchedules(true);
+        const schedules = await scheduleService.getWorkerSchedules(business.id, selectedWorkerId);
+        setWorkerSchedules(Array.isArray(schedules) ? schedules : []);
+      } catch (err) {
+        console.error('Error fetching worker schedules:', err);
+        setWorkerSchedules([]);
+        if (err instanceof ApiError) {
+          setPopup({ type: 'error', message: `Error al cargar horarios: ${err.message}` });
+        }
+      } finally {
+        setIsLoadingSchedules(false);
+      }
+    };
+
+    fetchSchedules();
+  }, [business, selectedWorkerId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!business || !selectedDate) return;
@@ -92,9 +175,15 @@ export default function ReservarPage({ params }: PageProps) {
       const endUtc = startUtc; // if you need a duration, compute and add minutes here
 
       // Create reservation request (timestamps in UTC ISO format)
+      if (!selectedServiceId) {
+        setPopup({ type: 'error', message: 'Selecciona un servicio antes de confirmar la reserva.' });
+        setIsSubmitting(false);
+        return;
+      }
+
       const reservationData: CreateReservationRequest = {
         tenantId: business.id,
-        serviceId: '2f69dc19-9126-48c2-ad2e-ba2448142c4f',
+        serviceId: selectedServiceId,
         workerId: selectedWorkerId,
         startTime: startUtc,
         endTime: endUtc,
@@ -102,7 +191,7 @@ export default function ReservarPage({ params }: PageProps) {
         clientName: customerName,
         clientEmail: customerEmail,
         clientPhone: customerPhone,
-        price: 0,
+        price: services.find(s => s.id === selectedServiceId)?.price ?? 0,
         notes: `Número de personas: ${numberOfPeople}\n${specialRequests}`.trim(),
       };
 
@@ -119,6 +208,7 @@ export default function ReservarPage({ params }: PageProps) {
       setSpecialRequests('');
       setNumberOfPeople(2);
       setSelectedWorkerId('');
+      setSelectedServiceId('');
       
     } catch (err) {
       if (err instanceof ApiError) {
@@ -143,8 +233,31 @@ export default function ReservarPage({ params }: PageProps) {
   };
 
   const isDateUnavailable = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return unavailableDates.includes(dateStr);
+    // Past dates are always disabled
+    if (isDatePast(date)) return true;
+
+    // If no worker selected, we don't disable dates based on schedules (no mock data used)
+    if (!selectedWorkerId) return false;
+
+    const dateStr = formatDateToYYYYMMDD(date);
+
+    // 1) Specific-date overrides take precedence
+    const overrides = workerSchedules.filter(s => s.specificDate === dateStr);
+    if (overrides.length > 0) {
+      // If any override marks availability for that date, treat as available
+      const anyAvailable = overrides.some(s => s.isAvailable);
+      return !anyAvailable;
+    }
+
+    // 2) Fallback to recurring schedules for that weekday
+    const recurring = workerSchedules.filter(s => !s.specificDate && s.dayOfWeek === date.getDay());
+    if (recurring.length > 0) {
+      const anyAvailable = recurring.some(s => s.isAvailable);
+      return !anyAvailable;
+    }
+
+    // 3) No schedule => unavailable
+    return true;
   };
 
   const isDatePast = (date: Date) => {
@@ -352,6 +465,30 @@ export default function ReservarPage({ params }: PageProps) {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                      {/* Service Selection */}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-secondary-500 dark:text-secondary-400 ml-1">
+                          Servicio
+                        </label>
+                        <select
+                          value={selectedServiceId}
+                          onChange={(e) => setSelectedServiceId(e.target.value)}
+                          required
+                          disabled={isLoadingServices || (services.length === 0)}
+                          className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-light dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 focus:outline-none transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <option value="">{isLoadingServices ? 'Cargando servicios...' : services.length === 0 ? 'Sin servicios' : 'Selecciona un servicio'}</option>
+                          {services.map(s => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} — {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(s.price)}
+                            </option>
+                          ))}
+                        </select>
+                        {!selectedServiceId && services.length > 0 && (
+                          <p className="text-xs text-secondary-500 mt-1 ml-1">Selecciona un servicio para continuar</p>
+                        )}
+                      </div>
+
                       {/* Worker Selection */}
                       <WorkerSelector
                         tenantId={business.id}
@@ -370,13 +507,44 @@ export default function ReservarPage({ params }: PageProps) {
                             value={selectedTime}
                             onChange={(e) => setSelectedTime(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-light dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 focus:outline-none transition-all duration-200 font-semibold"
+                            disabled={!selectedWorkerId || isLoadingTimeSlots}
+                            className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-light dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 focus:outline-none transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <option value="">--:--</option>
-                            {availableTimes.map(time => (
-                              <option key={time} value={time}>{time}</option>
-                            ))}
+                            <option value="">
+                              {isLoadingTimeSlots 
+                                ? 'Cargando...' 
+                                : !selectedWorkerId 
+                                  ? 'Selecciona trabajador' 
+                                  : availableTimeSlots.length === 0
+                                    ? 'Sin horarios'
+                                    : '--:--'}
+                            </option>
+                            {availableTimeSlots
+                              .filter(slot => slot.isAvailable)
+                              .map(slot => {
+                                const startTime = new Date(slot.startTime);
+                                const timeStr = startTime.toLocaleTimeString('es-ES', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: false 
+                                });
+                                return (
+                                  <option key={slot.startTime} value={timeStr}>
+                                    {timeStr}
+                                  </option>
+                                );
+                              })}
                           </select>
+                          {!selectedWorkerId && (
+                            <p className="text-xs text-secondary-500 mt-1 ml-1">
+                              Primero selecciona un trabajador
+                            </p>
+                          )}
+                          {selectedWorkerId && !isLoadingTimeSlots && availableTimeSlots.filter(s => s.isAvailable).length === 0 && (
+                            <p className="text-xs text-red-500 mt-1 ml-1">
+                              No hay horarios disponibles para esta fecha
+                            </p>
+                          )}
                         </div>
 
                         <div>
