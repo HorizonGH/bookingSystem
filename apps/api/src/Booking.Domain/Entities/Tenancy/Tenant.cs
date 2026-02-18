@@ -22,6 +22,11 @@ public class Tenant : Idendity.Entity
     // Business Hours (JSON or separate table)
     public string? BusinessHours { get; set; }
     
+    // Default Schedule Constraints for Workers
+    public TimeSpan DefaultScheduleStartTime { get; set; } = new TimeSpan(9, 0, 0); // 9:00 AM
+    public TimeSpan DefaultScheduleEndTime { get; set; } = new TimeSpan(18, 0, 0); // 6:00 PM
+    public string AllowedScheduleDays { get; set; } = "1,2,3,4,5,6"; // Monday-Saturday (0=Sunday, 6=Saturday)
+    
     // Navigation Properties
     public ICollection<TenantPlan> TenantPlans { get; set; } = new List<TenantPlan>();
     public ICollection<User> Users { get; set; } = new List<User>();

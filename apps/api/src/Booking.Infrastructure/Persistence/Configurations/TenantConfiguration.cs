@@ -56,5 +56,19 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         
         builder.Property(t => t.BusinessHours)
             .HasMaxLength(2000);
+        
+        // Default Schedule Constraints
+        builder.Property(t => t.DefaultScheduleStartTime)
+            .IsRequired()
+            .HasDefaultValue(new TimeSpan(9, 0, 0));
+        
+        builder.Property(t => t.DefaultScheduleEndTime)
+            .IsRequired()
+            .HasDefaultValue(new TimeSpan(18, 0, 0));
+        
+        builder.Property(t => t.AllowedScheduleDays)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("1,2,3,4,5,6"); // Monday-Saturday
     }
 }

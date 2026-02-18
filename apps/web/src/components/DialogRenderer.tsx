@@ -6,7 +6,7 @@ import { subscribe, resolveCurrent, attachToWindow } from '../lib/dialog';
 
 function ConfirmModal({ title, message, onConfirm, onCancel }: { title?: string; message: string; onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div className="relative z-10 max-w-lg w-full rounded-2xl p-6 bg-white dark:bg-dark-light border border-light-darker dark:border-secondary-700 shadow-2xl">
         <div className="flex items-start gap-4">
@@ -30,7 +30,7 @@ function ConfirmModal({ title, message, onConfirm, onCancel }: { title?: string;
 function PromptModal({ title, message, defaultValue, onConfirm, onCancel }: { title?: string; message: string; defaultValue?: string; onConfirm: (value: string) => void; onCancel: () => void }) {
   const [value, setValue] = useState(defaultValue ?? '');
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div className="relative z-10 max-w-lg w-full rounded-2xl p-6 bg-white dark:bg-dark-light border border-light-darker dark:border-secondary-700 shadow-2xl">
         <div className="flex items-start gap-4">

@@ -40,7 +40,7 @@ export default function MessagePopup({
 
   return (
     // keep the backdrop (modal feel) but position content at the TOP so it "drops in" like an alert
-    <div className="fixed inset-0 z-60 flex items-start justify-center pt-6 px-4" onClick={handleBackdrop}>
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-6 px-4" onClick={handleBackdrop}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
       {/* popup content appears from top with an attention animation */}
