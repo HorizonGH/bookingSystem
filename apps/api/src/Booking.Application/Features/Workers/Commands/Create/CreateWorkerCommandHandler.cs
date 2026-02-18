@@ -19,8 +19,6 @@ public class CreateWorkerCommandHandler : IRequestHandler<CreateWorkerCommand, W
 
     public async Task<WorkerDto> Handle(CreateWorkerCommand request, CancellationToken cancellationToken)
     {
-        var req = request.Request;
-
         // Use tenantId provided by the caller (TenantAdmin) — the user being added may not have a TenantId
         var tenantId = request.TenantId;
         if (tenantId == Guid.Empty)
@@ -34,7 +32,7 @@ public class CreateWorkerCommandHandler : IRequestHandler<CreateWorkerCommand, W
 
         // Get user to validate it exists
         var userRepo = _unitOfWork.ReadRepository<Domain.Entities.Idendity.User>();
-        var user = await userRepo.GetByIdAsync(req.UserId);
+        var user = await userRepo.GetByIdAsync(request.UserId);
         if (user == null)
             throw new InvalidOperationException("User not found");
 
@@ -46,7 +44,7 @@ public class CreateWorkerCommandHandler : IRequestHandler<CreateWorkerCommand, W
         var workerRepo = _unitOfWork.ReadRepository<Worker>();
         var existingWorker = await workerRepo
             .GetAll()
-            .FirstOrDefaultAsync(w => w.UserId == req.UserId && w.TenantId == tenantId, cancellationToken);
+            .FirstOrDefaultAsync(w => w.UserId == request.UserId && w.TenantId == tenantId, cancellationToken);
 
         if (existingWorker != null)
             throw new InvalidOperationException("User is already a worker for this tenant");
@@ -77,12 +75,12 @@ public class CreateWorkerCommandHandler : IRequestHandler<CreateWorkerCommand, W
         // Create worker
         var worker = new Worker
         {
-            UserId = req.UserId,
+            UserId = request.UserId,
             TenantId = tenantId,
-            JobTitle = req.JobTitle,
-            Bio = req.Bio,
-            ProfileImageUrl = req.ProfileImageUrl,
-            IsAvailableForBooking = req.IsAvailableForBooking,
+            JobTitle = request.JobTitle,
+            Bio = request.Bio,
+            ProfileImageUrl = request.ProfileImageUrl,
+            IsAvailableForBooking = request.IsAvailableForBooking,
             Created = DateTime.UtcNow
         };
 

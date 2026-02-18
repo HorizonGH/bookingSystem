@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class CreateTenantEndpoint : CoreEndpoint<CreateTenantRequest, TenantDto>
+public class CreateTenantEndpoint : CoreEndpoint<CreateTenantCommand, TenantDto>
 {
     public CreateTenantEndpoint(IMediator mediator) : base(mediator) { }
 
@@ -20,10 +20,9 @@ public class CreateTenantEndpoint : CoreEndpoint<CreateTenantRequest, TenantDto>
             .ProducesProblem(400));
     }
 
-    public override async Task HandleAsync(CreateTenantRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateTenantCommand req, CancellationToken ct)
     {
-        var command = new CreateTenantCommand { Request = req };
-        Response = await _mediator.Send(command, ct);
+        Response = await _mediator.Send(req, ct);
         HttpContext.Response.StatusCode = 201;
     }
 }

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Workers;
 
-public class CreateWorkerEndpoint : CoreEndpoint<CreateWorkerRequest, WorkerDto>
+public class CreateWorkerEndpoint : CoreEndpoint<CreateWorkerCommand, WorkerDto>
 {
     public CreateWorkerEndpoint(IMediator mediator) : base(mediator) { }
 
@@ -24,12 +24,11 @@ public class CreateWorkerEndpoint : CoreEndpoint<CreateWorkerRequest, WorkerDto>
         Roles("TenantAdmin");
     }
 
-    public override async Task HandleAsync(CreateWorkerRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateWorkerCommand req, CancellationToken ct)
     {
         try
         {
-            var command = new CreateWorkerCommand { Request = req, TenantId = req.TenantId }; 
-            Response = await _mediator.Send(command, ct);
+            Response = await _mediator.Send(req, ct);
             HttpContext.Response.StatusCode = 201;
         }
         catch (InvalidOperationException ex)

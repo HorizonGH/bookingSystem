@@ -1,4 +1,5 @@
 import { apiClient } from './api';
+import { tokenStorage } from '../lib/tokenStorage';
 
 export interface LoginRequest {
   email: string;
@@ -98,30 +99,42 @@ export interface AuthResponse {
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    return apiClient.post<AuthResponse>('/auth/login', credentials);
+    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    // Save tokens securely
+    tokenStorage.saveTokens(response.accessToken, response.refreshToken);
+    return response;
   },
 
   async register(userData: RegisterRequest): Promise<AuthResponse> {
-    return apiClient.post<AuthResponse>('/auth/register', userData);
+    const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+    // Save tokens securely
+    tokenStorage.saveTokens(response.accessToken, response.refreshToken);
+    return response;
   },
 
   async registerTenant(tenantData: RegisterTenantRequest): Promise<AuthResponse> {
-    return apiClient.post<AuthResponse>('/auth/register-tenant', tenantData);
+    const response = await apiClient.post<AuthResponse>('/auth/register-tenant', tenantData);
+    // Save tokens securely
+    tokenStorage.saveTokens(response.accessToken, response.refreshToken);
+    return response;
   },
 
   async refreshToken(tokens: RefreshTokenRequest): Promise<AuthResponse> {
-    return apiClient.post<AuthResponse>('/auth/refresh', tokens);
+    const response = await apiClient.post<AuthResponse>('/auth/refresh', tokens);
+    // Update tokens after refresh
+    tokenStorage.saveTokens(response.accessToken, response.refreshToken);
+    return response;
   },
 
   async logout(): Promise<void> {
-  try {
-        await apiClient.post<void>('/auth/logout', {});
+    try {
+      await apiClient.post<void>('/auth/logout', {});
     } catch (error) {
-        console.warn('Logout API call failed, but clearing local tokens anyway:', error);
+      console.warn('Logout API call failed, but clearing local tokens anyway:', error);
     }
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-    },
+    // Clear tokens securely
+    tokenStorage.clearTokens();
+  },
 
   async getCurrentUser(): Promise<User> {
     return apiClient.get<User>('/auth/me');

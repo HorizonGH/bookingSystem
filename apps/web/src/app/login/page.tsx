@@ -19,13 +19,14 @@ export default function LoginPage() {
 
     try {
       const response = await authService.login({ email, password });
-      // Store tokens in localStorage
-      localStorage.setItem('authToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('expiresAt', response.expiresAt);
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = params.get('returnTo');
+
       console.log('Login successful:', response.user);
-      // Redirect to dashboard or home
-      window.location.href = '/';
+
+      // Redirect back to the page that caused the 401 (if safe), otherwise go home
+      const target = returnTo && returnTo.startsWith('/') ? returnTo : '/';
+      window.location.href = target;
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

@@ -65,10 +65,6 @@ export default function SignupPage() {
           password,
           phoneNumber: phoneNumber || undefined
         });
-        // Store tokens in localStorage
-        localStorage.setItem('authToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('expiresAt', response.expiresAt);
         console.log('Registration successful:', response.user);
         // Redirect to dashboard or home
         window.location.href = '/';
@@ -115,10 +111,6 @@ export default function SignupPage() {
           planType: selectedPlan
         }
       });
-      // Store tokens in localStorage
-      localStorage.setItem('authToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('expiresAt', response.expiresAt);
       console.log('Tenant registration successful:', response.user);
       // Redirect to dashboard or home
       window.location.href = '/';
