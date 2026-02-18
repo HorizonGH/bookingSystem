@@ -5,6 +5,7 @@ using Booking.Application.Common.Pagination;
 using Booking.Application.Features.Tenancy.Queries;
 using Booking.Domain.Entities.Tenancy;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Booking.Application.Features.Tenancy.Queries.GetAll;
 

@@ -1,34 +1,24 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import TenantManagement from '../../../../components/TenantManagement';
 import WorkerManagement from '../../../../components/WorkerManagement';
 import ServiceManagement from '../../../../components/ServiceManagement';
 import { authService, Tenant, User } from '../../../../services/auth';
 import { ApiError } from '../../../../services/api';
 
-type Tab = 'basic' | 'workers' | 'services';
+type SettingsTab = 'negocio' | 'servicios' | 'equipo';
 
 export default function BusinessSettingsPage() {
   const params = useParams() as { id: string };
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const businessId = params?.id;
 
-  const [activeTab, setActiveTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'basic');
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Sincronizar tab con URL
-  const handleTabChange = (tab: Tab) => {
-    setActiveTab(tab);
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', tab);
-    router.push(`?${newParams.toString()}`, { scroll: false });
-  };
+  const [activeTab, setActiveTab] = useState<SettingsTab>('negocio');
 
   useEffect(() => {
     const load = async () => {
@@ -72,86 +62,79 @@ export default function BusinessSettingsPage() {
   // Show management UI only to tenant admins (simple check)
   const isTenantAdmin = user?.tenantId === tenant.id;
 
-  return (
-    <div className="min-h-screen bg-light dark:bg-dark relative py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-dark dark:text-light">Configuración — {tenant.name}</h1>
-          <p className="text-secondary-500 mt-2">Gestiona la información de tu negocio, equipo y servicios.</p>
-        </div>
+  const tabs: { key: SettingsTab; label: string; icon: string }[] = [
+    { key: 'negocio', label: 'Negocio', icon: '🏢' },
+    { key: 'servicios', label: 'Servicios', icon: '✂️' },
+    { key: 'equipo', label: 'Equipo', icon: '👥' },
+  ];
 
-        {!isTenantAdmin && (
+  return (
+    <div className="min-h-screen bg-light dark:bg-dark relative pb-8">
+      {/* Page Header */}
+      <div className="bg-white dark:bg-dark-light border-b border-light-darker dark:border-secondary-700 px-4 py-4 md:py-6">
+        <div className="container mx-auto max-w-6xl">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark dark:text-light">
+            Configuración — {tenant.name}
+          </h1>
+          <p className="text-sm text-secondary-500 mt-0.5">Ajustes del negocio y gestión de equipo</p>
+        </div>
+      </div>
+
+      {!isTenantAdmin && (
+        <div className="container mx-auto max-w-6xl px-4 mt-8">
           <div className="bg-white dark:bg-dark-light rounded-2xl shadow p-6 border border-light-darker dark:border-secondary-700">
             <p className="text-center text-secondary-600">No tienes permisos para administrar este negocio.</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {isTenantAdmin && (
-          <div className="space-y-6">
-            
-            {/* Tabs Header */}
-            <div className="border-b border-light-darker dark:border-secondary-700">
-              <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+      {isTenantAdmin && (
+        <>
+          {/* ── Mobile Tab Bar (visible on < lg) ── */}
+          <div className="lg:hidden sticky top-0 z-30 bg-white dark:bg-dark-light border-b border-light-darker dark:border-secondary-700">
+            <div className="flex">
+              {tabs.map((tab) => (
                 <button
-                  onClick={() => handleTabChange('basic')}
-                  className={`
-                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
-                    ${activeTab === 'basic'
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold transition-colors border-b-2 ${
+                    activeTab === tab.key
                       ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300 hover:border-secondary-300'}
-                  `}
+                      : 'border-transparent text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-300'
+                  }`}
                 >
-                  Información Básica
+                  <span className="text-base">{tab.icon}</span>
+                  {tab.label}
                 </button>
-                <button
-                  onClick={() => handleTabChange('workers')}
-                  className={`
-                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
-                    ${activeTab === 'workers'
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300 hover:border-secondary-300'}
-                  `}
-                >
-                  Equipo de Trabajo
-                </button>
-                <button
-                  onClick={() => handleTabChange('services')}
-                  className={`
-                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
-                    ${activeTab === 'services'
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300 hover:border-secondary-300'}
-                  `}
-                >
-                  Servicios Ofrecidos
-                </button>
-              </nav>
+              ))}
             </div>
-
-            {/* Tab Content */}
-            <div className="mt-6 animate-fadeIn">
-              {activeTab === 'basic' && (
-                <div className="w-full">
-                  <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
-                </div>
-              )}
-
-              {activeTab === 'workers' && (
-                <div className="w-full">
-                  <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
-                </div>
-              )}
-
-              {activeTab === 'services' && (
-                <div className="w-full">
-                  <ServiceManagement tenantId={tenant.id} planType={tenant.planType} />
-                </div>
-              )}
-            </div>
-
           </div>
-        )}
-      </div>
+
+          {/* ── Mobile: single visible section ── */}
+          <div className="lg:hidden container mx-auto max-w-6xl px-4 py-4 space-y-4">
+            {activeTab === 'negocio' && (
+              <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
+            )}
+            {activeTab === 'servicios' && (
+              <ServiceManagement tenantId={tenant.id} planType={tenant.planType} />
+            )}
+            {activeTab === 'equipo' && (
+              <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
+            )}
+          </div>
+
+          {/* ── Desktop: grid layout (visible on lg+) ── */}
+          <div className="hidden lg:block container mx-auto max-w-6xl px-4 py-8">
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
+                <ServiceManagement tenantId={tenant.id} planType={tenant.planType} />
+              </div>
+              <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

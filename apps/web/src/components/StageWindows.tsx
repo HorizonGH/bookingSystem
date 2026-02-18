@@ -27,7 +27,7 @@ export default function StageWindows({ stages }: { stages: Stage[] }) {
     <div>
       {/* Tabs menu (only when more than one stage available) */}
       {visible.length > 1 && (
-        <nav role="tablist" aria-label="Profile sections" className="mb-6 flex gap-2 justify-center lg:justify-start">
+        <nav role="tablist" aria-label="Profile sections" className="mb-6 flex flex-wrap gap-2 justify-center lg:justify-start">
           {visible.map((s) => {
             const selected = s.id === activeStage.id;
             return (

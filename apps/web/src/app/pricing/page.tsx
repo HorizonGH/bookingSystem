@@ -1,12 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
-  const plans = [
+  // UI model used by this page (keeps the existing card shape)
+  type UIPlan = {
+    id?: string;
+    name: string;
+    description?: string;
+    monthlyPrice: number;
+    yearlyPrice: number;
+    features: string[];
+    highlighted?: boolean;
+    color?: string;
+    badge?: string;
+    planType?: number;
+  };
+
+  // fallback (used while API loads or if the API fails)
+  const [plans, setPlans] = useState<UIPlan[]>([
     {
       name: 'Starter',
       description: 'Perfecto para negocios que están comenzando',
@@ -21,7 +36,8 @@ export default function PricingPage() {
         'Panel de control básico'
       ],
       highlighted: false,
-      color: 'from-secondary-500 to-secondary-600'
+      color: 'from-secondary-500 to-secondary-600',
+      planType: 0
     },
     {
       name: 'Professional',
@@ -41,7 +57,8 @@ export default function PricingPage() {
       ],
       highlighted: true,
       color: 'from-primary-500 to-secondary-600',
-      badge: 'Más Popular'
+      badge: 'Más Popular',
+      planType: 2
     },
     {
       name: 'Enterprise',
@@ -61,11 +78,75 @@ export default function PricingPage() {
         'Reportes avanzados'
       ],
       highlighted: false,
-      color: 'from-purple-500 to-pink-600'
+      color: 'from-purple-500 to-pink-600',
+      planType: 3
     }
-  ];
+  ]);
 
-  const getPrice = (plan: typeof plans[0]) => {
+  // Load plans from API and map them into the UI shape. Supports APIs that
+  // return separate entries per billingCycle (monthly/yearly) or a single
+  // price per plan.
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { planService } = await import('../../services/plan');
+        const apiPlans = await planService.getPlans();
+
+        const grouped = new Map<number, typeof apiPlans>();
+        apiPlans.forEach((p) => {
+          const pt = Number(p.planType ?? 0);
+          if (!grouped.has(pt)) grouped.set(pt, [] as any);
+          grouped.get(pt)!.push(p);
+        });
+
+        const mapped: UIPlan[] = Array.from(grouped.entries())
+          .sort((a, b) => a[0] - b[0])
+          .map(([pt, entries]) => {
+            const monthly = entries.find((e) => e.billingCycle && e.billingCycle.toLowerCase().includes('month'));
+            const yearly = entries.find((e) => e.billingCycle && e.billingCycle.toLowerCase().includes('year'));
+            const monthlyPrice = monthly ? monthly.price : entries[0].price ?? 0;
+            const yearlyPrice = yearly ? yearly.price : monthlyPrice;
+
+            const entry = entries[0];
+            const name = entry.name || (pt === 0 ? 'Starter' : pt === 1 ? 'Basic' : pt === 2 ? 'Professional' : 'Enterprise');
+            const description = entry.description || '';
+
+            const features: string[] = [];
+            const safeReservations = entry.maxReservationsPerMonth === -1 ? Infinity : entry.maxReservationsPerMonth;
+            const safeWorkers = entry.maxWorkers === -1 ? Infinity : entry.maxWorkers;
+            const safeServices = entry.maxServices === -1 ? Infinity : entry.maxServices;
+
+            if (safeReservations !== undefined && safeReservations !== null) features.push(safeReservations === Infinity ? 'Reservas ilimitadas' : `${safeReservations} reservas/mes`);
+            if (safeWorkers !== undefined && safeWorkers !== null) features.push(safeWorkers === Infinity ? 'Trabajadores ilimitados' : `${safeWorkers} trabajadores`);
+            if (safeServices !== undefined && safeServices !== null) features.push(safeServices === Infinity ? 'Servicios ilimitados' : `${safeServices} servicios`);
+            if (entry.hasCustomBranding) features.push('Personalización de marca');
+            if (entry.hasAnalytics) features.push('Analytics');
+            if (entry.hasApiAccess) features.push('Acceso a API');
+
+            return {
+              id: entry.id,
+              name,
+              description,
+              monthlyPrice,
+              yearlyPrice,
+              features: features.length ? features : ['Funciones estándar'],
+              highlighted: pt === 2,
+              color: pt === 2 ? 'from-primary-500 to-secondary-600' : pt === 3 ? 'from-purple-500 to-pink-600' : 'from-secondary-500 to-secondary-600',
+              badge: pt === 2 ? 'Más Popular' : undefined,
+              planType: pt
+            };
+          });
+
+        if (mounted && mapped.length > 0) setPlans(mapped);
+      } catch (err) {
+        console.warn('Could not load plans from API, using fallback.', err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const getPrice = (plan: UIPlan) => {
     const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
     const period = billingCycle === 'monthly' ? 'mes' : 'año';
     return { price, period };
@@ -80,7 +161,7 @@ export default function PricingPage() {
       </div>
 
        {/* Hero Content */}
-      <div className="container mx-auto px-4 pt-20 pb-12 relative z-10 text-center">
+      <div className="container mx-auto px-4 pt-10 pb-8 md:pt-20 md:pb-12 relative z-10 text-center">
          <Link 
             href="/"
             className="inline-flex items-center text-secondary-600 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-400 transition-colors duration-200 mb-8 font-semibold"
@@ -92,22 +173,22 @@ export default function PricingPage() {
           </Link>
       
 
-        <h1 className="text-5xl md:text-7xl font-extrabold text-dark dark:text-light mb-6">
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold text-dark dark:text-light mb-4 md:mb-6">
           Precios <span className="bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">simples y transparentes</span>
         </h1>
-        <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto mb-12">
+        <p className="text-base md:text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto mb-8 md:mb-12">
           Elige el plan perfecto para potenciar tu negocio hoy mismo. Actualiza, degrada o cancela en cualquier momento.
         </p>
 
         {/* Custom Toggle Switch */}
-        <div className="flex justify-center mb-16">
+        <div className="flex justify-center mb-8 md:mb-16">
           <div className="bg-white/50 dark:bg-dark-light/50 backdrop-blur-md p-1.5 rounded-2xl border border-light-darker dark:border-secondary-700 shadow-lg inline-flex relative">
              <div className="absolute -top-3 -right-6 md:-right-10 rotate-12 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
                 Ahorra 17% 🔥
              </div>
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
                 billingCycle === 'monthly'
                   ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md'
                   : 'text-secondary-600 dark:text-secondary-400 hover:bg-light-darker dark:hover:bg-secondary-800/50'
@@ -117,7 +198,7 @@ export default function PricingPage() {
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
                 billingCycle === 'yearly'
                   ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md'
                   : 'text-secondary-600 dark:text-secondary-400 hover:bg-light-darker dark:hover:bg-secondary-800/50'
@@ -130,7 +211,7 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="container mx-auto px-4 pb-32 relative z-10">
+        <div className="container mx-auto px-4 pb-16 md:pb-32 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto items-center">
           {plans.map((plan, index) => {
             const { price, period } = getPrice(plan);
@@ -140,7 +221,7 @@ export default function PricingPage() {
                 key={index}
                 className={`group relative bg-white dark:bg-dark-light rounded-3xl transition-all duration-500 backdrop-blur-sm
                   ${plan.highlighted 
-                    ? 'shadow-2xl shadow-primary-500/20 scale-105 border-2 border-primary-500 z-10' 
+                    ? 'shadow-2xl shadow-primary-500/20 md:scale-105 border-2 border-primary-500 z-10' 
                     : 'shadow-xl border border-light-darker dark:border-secondary-700 hover:shadow-2xl hover:-translate-y-2'
                   }
                 `}
@@ -164,15 +245,17 @@ export default function PricingPage() {
 
                   {/* Price */}
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl md:text-5xl font-extrabold text-dark dark:text-light">
-                      €{price}
-                    </span>
-                    <span className="text-secondary-500 font-medium">/{period}</span>
+                    {price === 0 ? (
+                      <span className="text-4xl md:text-5xl font-extrabold text-dark dark:text-light">Gratis</span>
+                    ) : (
+                      <span className="text-4xl md:text-5xl font-extrabold text-dark dark:text-light">€{price}</span>
+                    )}
+                    {price !== 0 && <span className="text-secondary-500 font-medium">/{period}</span>}
                   </div>
 
                   {/* CTA */}
                   <Link
-                    href={`/register?plan=${plan.name.toLowerCase()}`}
+                    href={`/signup?planType=${plan.planType ?? index}`}
                     className={`block w-full py-4 rounded-xl font-bold text-center transition-all duration-300 shadow-md transform active:scale-95
                       ${plan.highlighted 
                         ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white hover:shadow-primary-500/40 hover:-translate-y-1' 

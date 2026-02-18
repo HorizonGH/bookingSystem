@@ -262,7 +262,7 @@ export default function SearchPage() {
                   setActiveCategory(cat);
                   setCategoryFilter(''); // Clear manual category filter when clicking category button
                 }}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
+                className={`flex-shrink-0 px-3 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                   activeCategory === cat
                     ? 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white shadow-lg shadow-primary-500/25 transform scale-105'
                     : 'bg-white dark:bg-dark-light text-secondary-600 dark:text-secondary-400 border border-light-darker dark:border-secondary-700 hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400'

@@ -173,26 +173,26 @@ export default function WorkerScheduleManagement({
         />
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h3 className="text-2xl font-bold text-dark dark:text-light">
+          <h3 className="text-lg md:text-2xl font-bold text-dark dark:text-light">
             Horarios {workerName ? `de ${workerName}` : ''}
           </h3>
           <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
             Gestiona la disponibilidad del trabajador
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={handleSetupStandardWeek}
             disabled={modalLoading}
-            className="px-4 py-2 bg-secondary-500 text-white rounded-lg hover:bg-secondary-600 transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-secondary-500 text-white rounded-lg hover:bg-secondary-600 transition-colors disabled:opacity-50"
           >
             Horario Estándar
           </button>
           <button
             onClick={openAddModal}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             + Agregar Horario
           </button>
@@ -251,7 +251,7 @@ export default function WorkerScheduleManagement({
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h4 className="text-lg font-semibold text-dark dark:text-light">
+                    <h4 className="text-sm sm:text-lg font-semibold text-dark dark:text-light">
                       {schedule.specificDate
                         ? new Date(schedule.specificDate).toLocaleDateString('es-ES', {
                             weekday: 'long',
@@ -281,16 +281,16 @@ export default function WorkerScheduleManagement({
                     </p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     onClick={() => openEditModal(schedule)}
-                    className="px-4 py-2 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    className="px-2 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(schedule.id)}
-                    className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="px-2 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   >
                     Eliminar
                   </button>
@@ -305,7 +305,7 @@ export default function WorkerScheduleManagement({
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-dark rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold text-dark dark:text-light mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-dark dark:text-light mb-4 md:mb-6">
               {editingSchedule ? 'Editar Horario' : 'Agregar Horario'}
             </h3>
 

@@ -133,10 +133,10 @@ export default function ProfilePage() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-secondary-500/10 rounded-full blur-[120px] opacity-40" />
       </div>
 
-      <div className="container mx-auto px-4 py-12 relative z-10 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 md:py-12 relative z-10 max-w-6xl">
         
         {/* Header Section */}
-        <div className="mb-12">
+        <div className="mb-6 md:mb-12">
           <Link
             href="/"
             className="inline-flex items-center text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-400 transition-colors duration-200 mb-6 group"
@@ -158,10 +158,10 @@ export default function ProfilePage() {
                   {user.role}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-dark dark:text-light mb-2">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-dark dark:text-light mb-2">
                 Mi Perfil
               </h1>
-              <p className="text-xl text-secondary-600 dark:text-secondary-400">
+              <p className="text-base md:text-xl text-secondary-600 dark:text-secondary-400">
                 {user.firstName} {user.lastName}
               </p>
             </div>

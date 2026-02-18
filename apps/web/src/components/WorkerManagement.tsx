@@ -1,11 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   WorkerDto, 
   workerService, 
-  CreateWorkerRequest, 
-  UpdateWorkerRequest,
   getMaxWorkersForPlan,
   canAddWorker,
   getWorkerLimitDescription
@@ -13,7 +12,6 @@ import {
 import MessagePopup from './MessagePopup';
 import { User, PlanType } from '../services/auth';
 import { ApiError } from '../services/api';
-import WorkerScheduleManagement from './WorkerScheduleManagement';
 
 interface WorkerManagementProps {
   tenantId: string;
@@ -25,39 +23,17 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
   const [workers, setWorkers] = useState<WorkerDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Add/Edit modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingWorker, setEditingWorker] = useState<WorkerDto | null>(null);
-  const [modalLoading, setModalLoading] = useState(false);
-
-  // Schedule management state
-  const [scheduleWorker, setScheduleWorker] = useState<WorkerDto | null>(null);
-
-  // Error / message popup
-  const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string; title?: string } | null>(null);
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    userId: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    jobTitle: '',
-    bio: '',
-    profileImageUrl: '',
-    isAvailableForBooking: true,
-  });
+  const [popup, setPopup] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null);
 
   const maxWorkers = getMaxWorkersForPlan(planType as PlanType);
   const canAdd = canAddWorker(planType as PlanType, (workers || []).length);
+  const router = useRouter();
 
   const fetchWorkers = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
       const workerList = await workerService.getWorkersByTenant(tenantId);
-      // Ensure workerList is always an array
       setWorkers(Array.isArray(workerList) ? workerList : []);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -65,7 +41,6 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
       } else {
         setError('Error al cargar los trabajadores');
       }
-      // Ensure workers is set to empty array on error
       setWorkers([]);
     } finally {
       setIsLoading(false);
@@ -76,116 +51,7 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
     fetchWorkers();
   }, [fetchWorkers]);
 
-  const openAddModal = () => {
-    setEditingWorker(null);
-    setFormData({
-      // default userId to current user to avoid backend validation failures
-      userId: currentUser?.id || '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      jobTitle: '',
-      bio: '',
-      profileImageUrl: '',
-      isAvailableForBooking: true,
-    });
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (worker: WorkerDto) => {
-    setEditingWorker(worker);
-    setFormData({
-      userId: worker.userId || '',
-      firstName: worker.firstName || '',
-      lastName: worker.lastName || '',
-      email: worker.email || '',
-      jobTitle: worker.jobTitle || '',
-      bio: worker.bio || '',
-      profileImageUrl: worker.profileImageUrl || '',
-      isAvailableForBooking: worker.isAvailableForBooking,
-    });
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingWorker(null);
-    setFormData({
-      userId: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      jobTitle: '',
-      bio: '',
-      profileImageUrl: '',
-      isAvailableForBooking: true,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setModalLoading(true);
-
-    try {
-      if (editingWorker) {
-        // Update existing worker
-        const updateData: UpdateWorkerRequest = {
-          userId: formData.userId || undefined,
-          tenantId,
-          firstName: formData.firstName || undefined,
-          lastName: formData.lastName || undefined,
-          email: formData.email || undefined,
-          jobTitle: formData.jobTitle || undefined,
-          bio: formData.bio || undefined,
-          profileImageUrl: formData.profileImageUrl || undefined,
-          isAvailableForBooking: formData.isAvailableForBooking,
-        };
-        await workerService.updateWorker(editingWorker.id, updateData);
-        setPopup({ type: 'success', message: 'Trabajador actualizado exitosamente' });
-      } else {
-        // Create new worker - ensure we send a userId (fallback to current user)
-        const userIdToSend = formData.userId?.trim() || currentUser.id;
-
-        // Basic client-side validation
-        if (!userIdToSend) {
-          setPopup({ type: 'error', message: 'Se requiere userId para crear un trabajador. Vincula un usuario o usa tu propio userId.' });
-          setModalLoading(false);
-          return;
-        }
-
-        const createData: CreateWorkerRequest = {
-          userId: userIdToSend,
-          tenantId,
-          email: formData.email || undefined,
-          jobTitle: formData.jobTitle || undefined,
-          bio: formData.bio || undefined,
-          profileImageUrl: formData.profileImageUrl || undefined,
-          isAvailableForBooking: formData.isAvailableForBooking,
-        };
-
-        await workerService.createWorker(createData);
-        setPopup({ type: 'success', message: 'Trabajador agregado exitosamente' });
-      }
-      
-      await fetchWorkers();
-      closeModal();
-    } catch (err) {
-      console.error('Worker save error:', err);
-      if (err instanceof ApiError) {
-        // Prefer detailed API response when available
-        const details = (err as any).data ?? {};
-        const detailMessage = details?.errors ? JSON.stringify(details.errors) : details?.message || undefined;
-        setPopup({ type: 'error', message: `Error: ${err.message}${detailMessage ? ' — ' + detailMessage : ''}` });
-      } else {
-        setPopup({ type: 'error', message: 'Error al guardar el trabajador' });
-      }
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
   const handleDelete = async (workerId: string, workerName: string) => {
-    // Use the app confirm dialog (async) instead of native confirm()
     const { confirmDialog } = await import('../lib/dialog');
     const ok = await confirmDialog(`¿Estás seguro de que deseas eliminar a ${workerName}?`);
     if (!ok) return;
@@ -207,9 +73,7 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
     if (worker.firstName && worker.lastName) {
       return `${worker.firstName} ${worker.lastName}`;
     }
-    if (worker.firstName) {
-      return worker.firstName;
-    }
+    if (worker.firstName) return worker.firstName;
     return 'Trabajador';
   };
 
@@ -226,16 +90,15 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
             {getWorkerLimitDescription(planType as PlanType)} • {(workers || []).length} de {maxWorkers === Infinity ? '∞' : maxWorkers} en uso
           </p>
         </div>
-        
+
         <button
-          onClick={openAddModal}
-          disabled={!canAdd}
+          onClick={() => canAdd ? router.push('/business/' + tenantId + '/settings/worker/new') : router.push('/pricing')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             canAdd
               ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30'
-              : 'bg-secondary-100 dark:bg-secondary-800 text-secondary-400 dark:text-secondary-600 cursor-not-allowed'
+              : 'bg-secondary-100 dark:bg-secondary-800 text-secondary-400 dark:text-secondary-600 hover:brightness-95'
           }`}
-          title={!canAdd ? 'Has alcanzado el límite de trabajadores para tu plan' : 'Agregar trabajador'}
+          title={!canAdd ? 'Has alcanzado el límite de trabajadores para tu plan — Ir a Pricing' : 'Agregar trabajador'}
         >
           + Agregar Trabajador
         </button>
@@ -274,14 +137,12 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
               <p className="text-secondary-500 dark:text-secondary-400 mb-4">
                 Agrega miembros de tu equipo para que puedan recibir reservas
               </p>
-              {canAdd && (
-                <button
-                  onClick={openAddModal}
-                  className="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
-                >
-                  Agregar Primer Trabajador
-                </button>
-              )}
+              <button
+                onClick={() => canAdd ? router.push('/business/' + tenantId + '/settings/worker/new') : router.push('/pricing')}
+                className="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+              >
+                Agregar Primer Trabajador
+              </button>
             </div>
           ) : (
             (workers || []).map((worker) => (
@@ -295,15 +156,14 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                     <img
                       src={worker.profileImageUrl}
                       alt={getWorkerDisplayName(worker)}
-                      className="w-16 h-16 rounded-full object-cover ring-2 ring-light-darker dark:ring-secondary-700"
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-light-darker dark:ring-secondary-700"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 flex items-center justify-center text-white font-bold text-base sm:text-xl">
                       {getWorkerDisplayName(worker).charAt(0).toUpperCase()}
                     </div>
                   )}
-                  {/* Availability indicator */}
-                  <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-dark-light ${
+                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white dark:border-dark-light ${
                     worker.isAvailableForBooking ? 'bg-green-500' : 'bg-gray-400'
                   }`}></div>
                 </div>
@@ -311,7 +171,7 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                 {/* Worker Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-bold text-dark dark:text-light truncate">
+                    <h3 className="text-sm sm:text-lg font-bold text-dark dark:text-light truncate">
                       {getWorkerDisplayName(worker)}
                     </h3>
                     {worker.userId === currentUser.id && (
@@ -320,19 +180,16 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                       </span>
                     )}
                   </div>
-                  
                   {worker.jobTitle && (
                     <p className="text-sm font-medium text-secondary-600 dark:text-secondary-400 mb-1">
                       {worker.jobTitle}
                     </p>
                   )}
-                  
                   {worker.bio && (
                     <p className="text-xs text-secondary-500 dark:text-secondary-500 line-clamp-2">
                       {worker.bio}
                     </p>
                   )}
-                  
                   {worker.email && (
                     <p className="text-xs text-secondary-400 dark:text-secondary-600 mt-1">
                       {worker.email}
@@ -341,23 +198,23 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="flex flex-row sm:flex-col gap-1 sm:gap-2 flex-shrink-0">
                   <button
-                    onClick={() => setScheduleWorker(worker)}
-                    className="px-3 py-1.5 text-xs font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                    onClick={() => router.push('/business/' + tenantId + '/settings/worker/' + worker.id + '/schedule')}
+                    className="px-2 sm:px-3 py-1.5 text-xs font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                   >
                     📅 Horarios
                   </button>
                   <button
-                    onClick={() => openEditModal(worker)}
-                    className="px-3 py-1.5 text-xs font-medium bg-white dark:bg-dark border border-secondary-300 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-colors"
+                    onClick={() => router.push('/business/' + tenantId + '/settings/worker/' + worker.id)}
+                    className="px-2 sm:px-3 py-1.5 text-xs font-medium bg-white dark:bg-dark border border-secondary-300 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-colors"
                   >
                     Editar
                   </button>
                   {(workers || []).length > 1 && (
                     <button
                       onClick={() => handleDelete(worker.id, getWorkerDisplayName(worker))}
-                      className="px-3 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      className="px-2 sm:px-3 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                     >
                       Eliminar
                     </button>
@@ -369,190 +226,13 @@ export default function WorkerManagement({ tenantId, planType, currentUser }: Wo
         </div>
       )}
 
-      {/* Add/Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-light rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-light-darker dark:border-secondary-700">
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-primary-500 to-secondary-600 px-6 py-4 text-white rounded-t-2xl">
-              <h3 className="text-xl font-bold">
-                {editingWorker ? 'Editar Trabajador' : 'Agregar Trabajador'}
-              </h3>
-            </div>
-
-            {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                    Nombre
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                    placeholder="Nombre"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                    Apellidos
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                    placeholder="Apellidos"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="email@ejemplo.com"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                    Vincular a Usuario (userId)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.userId}
-                    onChange={(e) => setFormData({...formData, userId: e.target.value})}
-                    placeholder="ID usuario (por defecto: tu userId)"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                  />
-                  <p className="text-xs text-secondary-400 mt-2">Si dejas vacío se usará tu userId por defecto. Para vincular a otro usuario, pega aquí su ID.</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                  Título del Trabajo
-                </label>
-                <input
-                  type="text"
-                  value={formData.jobTitle}
-                  onChange={(e) => setFormData({...formData, jobTitle: e.target.value})}
-                  placeholder="Ej: Barbero, Estilista, Masajista"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                  Biografía
-                </label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                  placeholder="Breve descripción sobre el trabajador..."
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-secondary-700 dark:text-secondary-300">
-                  URL de Imagen de Perfil
-                </label>
-                <input
-                  type="url"
-                  value={formData.profileImageUrl}
-                  onChange={(e) => setFormData({...formData, profileImageUrl: e.target.value})}
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-white dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:outline-none transition-all duration-200"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 p-4 bg-light-darker dark:bg-secondary-900/30 rounded-xl">
-                <input
-                  type="checkbox"
-                  id="isAvailable"
-                  checked={formData.isAvailableForBooking}
-                  onChange={(e) => setFormData({...formData, isAvailableForBooking: e.target.checked})}
-                  className="w-5 h-5 rounded border-secondary-300 text-primary-500 focus:ring-primary-500"
-                />
-                <label htmlFor="isAvailable" className="text-sm font-medium text-secondary-700 dark:text-secondary-300 cursor-pointer">
-                  Disponible para recibir reservas
-                </label>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={modalLoading}
-                  className="flex-1 py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  {modalLoading ? 'Guardando...' : editingWorker ? 'Actualizar' : 'Agregar'}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={modalLoading}
-                  className="px-6 py-3 bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 rounded-xl hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Schedule Management Modal */}
-      {scheduleWorker && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-light-darker dark:border-secondary-700">
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-primary-500 to-secondary-600 px-6 py-4 text-white rounded-t-2xl flex items-center justify-between">
-              <h3 className="text-xl font-bold">
-                Gestionar Horarios - {getWorkerDisplayName(scheduleWorker)}
-              </h3>
-              <button
-                onClick={() => setScheduleWorker(null)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6">
-              <WorkerScheduleManagement
-                tenantId={tenantId}
-                workerId={scheduleWorker.id}
-                workerName={getWorkerDisplayName(scheduleWorker)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Message popup (error / success) */}
-      {popup && (
-        <MessagePopup
-          visible={!!popup}
-          type={popup.type}
-          title={popup.type === 'error' ? 'Error' : popup.type === 'success' ? 'Éxito' : undefined}
-          message={popup.message}
-          onClose={() => setPopup(null)}
-        />
-      )}
+      {/* Message popup */}
+      <MessagePopup
+        visible={popup !== null}
+        type={popup?.type}
+        message={popup?.message || ''}
+        onClose={() => setPopup(null)}
+      />
     </div>
   );
 }

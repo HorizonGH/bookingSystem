@@ -369,7 +369,7 @@ export default function ReservarPage({ params }: PageProps) {
 
       {/* Main Content */}
       {!isLoading && !error && business && (
-        <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="container mx-auto px-4 py-6 md:py-12 relative z-10">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -383,20 +383,20 @@ export default function ReservarPage({ params }: PageProps) {
                 Volver
               </Link>
 
-              <h1 className="text-4xl md:text-5xl font-extrabold text-dark dark:text-light mb-3">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-dark dark:text-light mb-2 md:mb-3">
                 Reservar en {business.name}
               </h1>
-              <p className="text-lg text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm md:text-lg text-secondary-600 dark:text-secondary-400">
                 Selecciona una fecha disponible para tu reserva
               </p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Calendar Section */}
-              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-8 border border-light-darker dark:border-secondary-700/50">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-dark dark:text-light">
+              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700/50">
+                <div className="mb-4 md:mb-6">
+                  <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <h2 className="text-xl md:text-2xl font-bold text-dark dark:text-light">
                       {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                     </h2>
                     <div className="flex gap-2">
@@ -452,11 +452,11 @@ export default function ReservarPage({ params }: PageProps) {
               </div>
 
               {/* Booking Form Section */}
-              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-8 border border-light-darker dark:border-secondary-700/50">
+              <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700/50">
                 {selectedDate ? (
                   <>
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-dark dark:text-light mb-2">
+                    <div className="mb-4 md:mb-6">
+                      <h2 className="text-xl md:text-2xl font-bold text-dark dark:text-light mb-2">
                         Detalles de tu Reserva
                       </h2>
                       <p className="text-secondary-600 dark:text-secondary-400">

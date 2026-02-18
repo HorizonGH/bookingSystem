@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Booking.WebApi.Endpoints.Tenancy;
 
-public class GetTenantByIdEndpoint : CoreEndpointWithoutRequest<TenantDto?>
+public class GetTenantByIdEndpoint : CoreEndpointWithoutRequest<TenantWithPlanDto?>
 {
     public GetTenantByIdEndpoint(IMediator mediator) : base(mediator) { }
 
@@ -16,7 +16,7 @@ public class GetTenantByIdEndpoint : CoreEndpointWithoutRequest<TenantDto?>
         AllowAnonymous(); // Adjust authorization as needed
         Description(d => d
             .WithTags("Tenants")
-            .Produces<TenantDto>(200)
+            .Produces<TenantWithPlanDto>(200)
             .Produces(404));
     }
 
