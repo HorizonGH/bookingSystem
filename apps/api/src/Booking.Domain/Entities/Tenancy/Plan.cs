@@ -14,6 +14,7 @@ public class Plan : Idendity.Entity
     public int MaxWorkers { get; set; }
     public int MaxServices { get; set; }
     public int MaxReservationsPerMonth { get; set; }
+    public int MaxImages { get; set; }
     public bool HasCustomBranding { get; set; }
     public bool HasAnalytics { get; set; }
     public bool HasApiAccess { get; set; }

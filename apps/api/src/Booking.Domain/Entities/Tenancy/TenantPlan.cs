@@ -20,6 +20,7 @@ public class TenantPlan : Idendity.Entity
     public int CurrentWorkers { get; set; }
     public int CurrentServices { get; set; }
     public int ReservationsThisMonth { get; set; }
+    public int CurrentImages { get; set; }
     
     // Navigation Properties
     public Tenant Tenant { get; set; } = null!;

@@ -32,16 +32,25 @@ public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Pag
                 t => t.Email,
                 t => t.City,
                 t => t.Country
-            ]);
+            ])
+            .Include(t => t.Images); // eager load for primary image lookup
 
         var pagedResult = await query.ToPagedResultAsync(
             request.Pagination.EffectivePageNumber,
             request.Pagination.EffectivePageSize,
             cancellationToken);
 
+        var items = pagedResult.Items.Select(t =>
+        {
+            var dto = TenantMapper.ToDto(t);
+            dto.PrimaryImageUrl = t.Images
+                .FirstOrDefault(i => i.IsPrimary)?.Url;
+            return dto;
+        }).ToList();
+
         return new PagedResult<TenantDto>
         {
-            Items = pagedResult.Items.Select(TenantMapper.ToDto).ToList(),
+            Items = items,
             TotalCount = pagedResult.TotalCount,
             PageNumber = pagedResult.PageNumber,
             PageSize = pagedResult.PageSize

@@ -26,4 +26,7 @@ public class TenantDto
     
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }
+
+    /// <summary>URL of the primary image uploaded by the tenant (if any)</summary>
+    public string? PrimaryImageUrl { get; set; }
 }

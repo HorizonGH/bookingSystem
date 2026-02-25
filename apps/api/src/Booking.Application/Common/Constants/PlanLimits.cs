@@ -31,6 +31,14 @@ public static class PlanLimits
         public const int Enterprise = int.MaxValue; // Unlimited
     }
 
+    public static class Images
+    {
+        public const int Free = 5;
+        public const int Basic = 20;
+        public const int Professional = 100;
+        public const int Enterprise = int.MaxValue; // Unlimited
+    }
+
     /// <summary>
     /// Get the maximum number of workers allowed for a plan type
     /// </summary>
@@ -101,5 +109,29 @@ public static class PlanLimits
     {
         var maxReservations = GetMaxReservationsPerMonth(planType);
         return currentReservations + reservationsToAdd <= maxReservations;
+    }
+
+    /// <summary>
+    /// Get the maximum number of images allowed for a plan type
+    /// </summary>
+    public static int GetMaxImages(PlanType planType)
+    {
+        return planType switch
+        {
+            PlanType.Free => Images.Free,
+            PlanType.Basic => Images.Basic,
+            PlanType.Professional => Images.Professional,
+            PlanType.Enterprise => Images.Enterprise,
+            _ => Images.Free
+        };
+    }
+
+    /// <summary>
+    /// Check if adding images would exceed the plan limit
+    /// </summary>
+    public static bool CanAddImages(PlanType planType, int currentImages, int imagesToAdd = 1)
+    {
+        var maxImages = GetMaxImages(planType);
+        return currentImages + imagesToAdd <= maxImages;
     }
 }

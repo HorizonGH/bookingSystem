@@ -5,10 +5,11 @@ import { useParams } from 'next/navigation';
 import TenantManagement from '../../../../components/TenantManagement';
 import WorkerManagement from '../../../../components/WorkerManagement';
 import ServiceManagement from '../../../../components/ServiceManagement';
+import TenantImageManager from '../../../../components/TenantImageManager';
 import { authService, Tenant, User } from '../../../../services/auth';
 import { ApiError } from '../../../../services/api';
 
-type SettingsTab = 'negocio' | 'servicios' | 'equipo';
+type SettingsTab = 'negocio' | 'servicios' | 'equipo' | 'imagenes';
 
 export default function BusinessSettingsPage() {
   const params = useParams() as { id: string };
@@ -66,6 +67,7 @@ export default function BusinessSettingsPage() {
     { key: 'negocio', label: 'Negocio', icon: '🏢' },
     { key: 'servicios', label: 'Servicios', icon: '✂️' },
     { key: 'equipo', label: 'Equipo', icon: '👥' },
+    { key: 'imagenes', label: 'Imágenes', icon: '🖼️' },
   ];
 
   return (
@@ -121,6 +123,9 @@ export default function BusinessSettingsPage() {
             {activeTab === 'equipo' && (
               <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
             )}
+            {activeTab === 'imagenes' && (
+              <TenantImageManager tenantId={tenant.id} planType={tenant.planType} />
+            )}
           </div>
 
           {/* ── Desktop: grid layout (visible on lg+) ── */}
@@ -130,6 +135,7 @@ export default function BusinessSettingsPage() {
                 <TenantManagement tenant={tenant} tenantId={tenant.id} onUpdate={(t) => setTenant(t)} />
                 <ServiceManagement tenantId={tenant.id} planType={tenant.planType} />
               </div>
+              <TenantImageManager tenantId={tenant.id} planType={tenant.planType} />
               <WorkerManagement tenantId={tenant.id} planType={tenant.planType} currentUser={user!} />
             </div>
           </div>

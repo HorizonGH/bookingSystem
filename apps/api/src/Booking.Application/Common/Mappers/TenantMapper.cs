@@ -14,7 +14,9 @@ public static partial class TenantMapper
     [MapperIgnoreSource(nameof(Tenant.Workers))]
     [MapperIgnoreSource(nameof(Tenant.Services))]
     [MapperIgnoreSource(nameof(Tenant.Reservations))]
+    [MapperIgnoreSource(nameof(Tenant.Images))]
     [MapperIgnoreSource(nameof(Tenant.StatusBaseEntity))]
+    [MapperIgnoreTarget(nameof(TenantDto.PrimaryImageUrl))]
     public static partial TenantDto ToDto(Tenant tenant);
 
     [MapperIgnoreTarget(nameof(Tenant.TenantPlans))]
@@ -22,6 +24,7 @@ public static partial class TenantMapper
     [MapperIgnoreTarget(nameof(Tenant.Workers))]
     [MapperIgnoreTarget(nameof(Tenant.Services))]
     [MapperIgnoreTarget(nameof(Tenant.Reservations))]
+    [MapperIgnoreTarget(nameof(Tenant.Images))]
     [MapperIgnoreTarget(nameof(Tenant.Id))]
     [MapperIgnoreTarget(nameof(Tenant.Created))]
     [MapperIgnoreTarget(nameof(Tenant.LastModified))]
@@ -33,6 +36,7 @@ public static partial class TenantMapper
     [MapperIgnoreTarget(nameof(Tenant.Workers))]
     [MapperIgnoreTarget(nameof(Tenant.Services))]
     [MapperIgnoreTarget(nameof(Tenant.Reservations))]
+    [MapperIgnoreTarget(nameof(Tenant.Images))]
     [MapperIgnoreTarget(nameof(Tenant.Id))]
     [MapperIgnoreTarget(nameof(Tenant.Created))]
     [MapperIgnoreTarget(nameof(Tenant.LastModified))]

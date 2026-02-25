@@ -43,11 +43,15 @@ public static class ServiceCollectionExtensions
         configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
+        // Configure Cloudinary settings
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+
         // Register services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IWorkerAvailabilityService, WorkerAvailabilityService>();
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         // Register repositories and Unit of Work

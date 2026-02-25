@@ -17,6 +17,17 @@ export interface TenantDto {
   businessHours?: string;
   planType?: number; // 0: Free, 1: Basic, 2: Professional, 3: Enterprise
   isActive?: boolean;
+  /** URL of the tenant's primary image (first image marked as primary) */
+  primaryImageUrl?: string;
+}
+
+// DTO returned by the tenant images endpoints
+export interface TenantImageDto {
+  id: string;
+  url: string;
+  altText?: string;
+  displayOrder?: number;
+  isPrimary: boolean;
 }
 
 export interface CreateTenantRequest {
@@ -143,5 +154,41 @@ export const tenantService = {
    */
   async deleteTenant(id: string): Promise<void> {
     return apiClient.delete<void>(`/tenants/${id}`);
+  },
+
+  /**
+   * Retrieve all images associated with a tenant.
+   */
+  async getTenantImages(tenantId: string): Promise<TenantImageDto[]> {
+    return apiClient.get<TenantImageDto[]>(`/tenants/${tenantId}/images`);
+  },
+
+  /**
+   * Upload a new image for the tenant. Accepts various optional metadata fields.
+   * The caller is responsible for constructing a FormData instance; the client
+   * library will not set Content-Type when FormData is detected.
+   */
+  async uploadTenantImage(
+    tenantId: string,
+    file: File,
+    altText?: string,
+    displayOrder?: number,
+    isPrimary?: boolean
+  ): Promise<TenantImageDto> {
+    const form = new FormData();
+    form.append('file', file);
+    if (altText !== undefined) form.append('AltText', altText);
+    if (displayOrder !== undefined && displayOrder !== null)
+      form.append('DisplayOrder', displayOrder.toString());
+    if (isPrimary !== undefined) form.append('IsPrimary', isPrimary.toString());
+
+    return apiClient.post<TenantImageDto>(`/tenants/${tenantId}/images`, form as any);
+  },
+
+  /**
+   * Remove an image from the tenant.
+   */
+  async deleteTenantImage(tenantId: string, imageId: string): Promise<void> {
+    return apiClient.delete<void>(`/tenants/${tenantId}/images/${imageId}`);
   },
 };
