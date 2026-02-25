@@ -33,4 +33,5 @@ public class Tenant : Idendity.Entity
     public ICollection<Worker> Workers { get; set; } = new List<Worker>();
     public ICollection<Service> Services { get; set; } = new List<Service>();
     public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+    public ICollection<TenantImage> Images { get; set; } = new List<TenantImage>();
 }

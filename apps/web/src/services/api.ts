@@ -103,8 +103,15 @@ class ApiClient {
       ...(options.headers as Record<string, string> | undefined),
     };
 
-    // Only set Content-Type for requests with a body (POST, PUT, PATCH, DELETE)
-    if (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) && options.body) {
+    // Only set Content-Type for requests with a body (POST, PUT, PATCH, DELETE).
+    // Do **not** override the header when the body is a FormData instance;
+    // the browser will set the correct multipart boundary for us.
+    if (
+      options.method &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) &&
+      options.body &&
+      !(options.body instanceof FormData)
+    ) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -216,26 +223,29 @@ class ApiClient {
   }
 
   async post<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    const body = data instanceof FormData ? data : data ? JSON.stringify(data) : undefined;
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined, 
+      body,
     });
   }
 
   async put<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    const body = data instanceof FormData ? data : data ? JSON.stringify(data) : undefined;
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body,
     });
   }
 
   async delete<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { 
-      ...options, 
+    const body = data instanceof FormData ? data : data ? JSON.stringify(data) : undefined;
+    return this.request<T>(endpoint, {
+      ...options,
       method: 'DELETE',
-      body: data ? JSON.stringify(data) : undefined,
+      body,
     });
   }
 }

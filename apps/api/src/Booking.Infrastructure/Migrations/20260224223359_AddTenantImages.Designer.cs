@@ -3,6 +3,7 @@ using System;
 using Booking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Booking.Infrastructure.Migrations
 {
     [DbContext(typeof(BookingDbContext))]
-    partial class BookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260224223359_AddTenantImages")]
+    partial class AddTenantImages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,7 +289,7 @@ namespace Booking.Infrastructure.Migrations
                             HasAnalytics = false,
                             HasApiAccess = false,
                             HasCustomBranding = false,
-                            MaxImages = 5,
+                            MaxImages = 0,
                             MaxReservationsPerMonth = 50,
                             MaxServices = 3,
                             MaxWorkers = 1,
@@ -304,7 +307,7 @@ namespace Booking.Infrastructure.Migrations
                             HasAnalytics = true,
                             HasApiAccess = false,
                             HasCustomBranding = false,
-                            MaxImages = 20,
+                            MaxImages = 0,
                             MaxReservationsPerMonth = 200,
                             MaxServices = 10,
                             MaxWorkers = 3,
@@ -322,7 +325,7 @@ namespace Booking.Infrastructure.Migrations
                             HasAnalytics = true,
                             HasApiAccess = true,
                             HasCustomBranding = true,
-                            MaxImages = 100,
+                            MaxImages = 0,
                             MaxReservationsPerMonth = -1,
                             MaxServices = 50,
                             MaxWorkers = 20,
@@ -340,7 +343,7 @@ namespace Booking.Infrastructure.Migrations
                             HasAnalytics = true,
                             HasApiAccess = true,
                             HasCustomBranding = true,
-                            MaxImages = -1,
+                            MaxImages = 0,
                             MaxReservationsPerMonth = -1,
                             MaxServices = -1,
                             MaxWorkers = -1,

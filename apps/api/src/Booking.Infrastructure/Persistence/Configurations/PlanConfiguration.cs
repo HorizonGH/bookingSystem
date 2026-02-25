@@ -38,6 +38,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<Plan>
                 MaxWorkers = 1,
                 MaxServices = 3,
                 MaxReservationsPerMonth = 50,
+                MaxImages = 5,
                 HasCustomBranding = false,
                 HasAnalytics = false,
                 HasApiAccess = false,
@@ -55,6 +56,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<Plan>
                 MaxWorkers = 3,
                 MaxServices = 10,
                 MaxReservationsPerMonth = 200,
+                MaxImages = 20,
                 HasCustomBranding = false,
                 HasAnalytics = true,
                 HasApiAccess = false,
@@ -72,6 +74,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<Plan>
                 MaxWorkers = 20,
                 MaxServices = 50,
                 MaxReservationsPerMonth = -1,
+                MaxImages = 100,
                 HasCustomBranding = true,
                 HasAnalytics = true,
                 HasApiAccess = true,
@@ -89,6 +92,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<Plan>
                 MaxWorkers = -1, // Unlimited
                 MaxServices = -1, // Unlimited
                 MaxReservationsPerMonth = -1, // Unlimited
+                MaxImages = -1, // Unlimited
                 HasCustomBranding = true,
                 HasAnalytics = true,
                 HasApiAccess = true,

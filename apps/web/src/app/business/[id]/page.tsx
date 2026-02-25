@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { use, useState, useEffect } from 'react';
-import { tenantService, TenantDto } from '../../../services/tenant';
+import { tenantService, TenantDto, TenantImageDto } from '../../../services/tenant';
 import { ApiError } from '../../../services/api';
 
 interface PageProps {
@@ -16,6 +16,8 @@ export default function BusinessDetailPage({ params }: PageProps) {
   const [business, setBusiness] = useState<TenantDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [images, setImages] = useState<TenantImageDto[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Fetch business data
   useEffect(() => {
@@ -23,13 +25,17 @@ export default function BusinessDetailPage({ params }: PageProps) {
       try {
         setIsLoading(true);
         setError('');
-        const businessData = await tenantService.getTenantById(businessId);
+        const [businessData, imageData] = await Promise.all([
+          tenantService.getTenantById(businessId),
+          tenantService.getTenantImages(businessId).catch(() => [] as TenantImageDto[]),
+        ]);
         setBusiness(businessData);
+        setImages(imageData);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
         } else {
-          setError('Error al cargar la información del negocio');
+          setError('Error al cargar la informaciÃƒÂ³n del negocio');
         }
       } finally {
         setIsLoading(false);
@@ -52,7 +58,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-secondary-600 dark:text-secondary-400">Cargando información del negocio...</p>
+            <p className="text-secondary-600 dark:text-secondary-400">Cargando informaciÃƒÂ³n del negocio...</p>
           </div>
         </div>
       )}
@@ -99,7 +105,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Volver a búsqueda
+            Volver a bÃƒÂºsqueda
           </Link>
 
           {/* Hero Content */}
@@ -121,7 +127,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
               <div className="hidden sm:flex flex-wrap items-center gap-3 md:gap-6 text-white/90 font-medium animate-slideUp" style={{animationDelay: '200ms'}}>
                  <div className="flex items-center gap-1.5">
                     <svg className="w-6 h-6 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                    <span>{business.city || 'Ubicación no especificada'}</span>
+                    <span>{business.city || 'UbicaciÃƒÂ³n no especificada'}</span>
                  </div>
                  <div className="flex items-center gap-1.5">
                     <svg className="w-6 h-6 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
@@ -156,7 +162,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
                 {/* Contact Icons Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      {[
-                        { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>, text: business.address || 'Dirección no especificada' },
+                        { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>, text: business.address || 'DirecciÃƒÂ³n no especificada' },
                         { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>, text: business.phoneNumber },
                         { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>, text: business.email },
                         { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, text: business.businessHours || 'Horarios no especificados' }
@@ -170,6 +176,70 @@ export default function BusinessDetailPage({ params }: PageProps) {
                      ))}
                 </div>
               </div>
+
+              {/* Image Gallery */}
+              {images.length > 0 && (
+                <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700/50 backdrop-blur-sm">
+                  <h3 className="text-xl md:text-2xl font-bold text-dark dark:text-light mb-4 md:mb-6 flex items-center gap-2">
+                    <span className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-secondary-500"></span>
+                    Galería
+                  </h3>
+
+                  {(() => {
+                    const ordered = [...images].sort((a, b) => {
+                      if (a.isPrimary && !b.isPrimary) return -1;
+                      if (!a.isPrimary && b.isPrimary) return 1;
+                      return (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+                    });
+                    const [hero, ...thumbs] = ordered;
+                    return (
+                      <div className="space-y-3">
+                        {/* Hero image */}
+                        <button
+                          onClick={() => setLightboxIndex(ordered.indexOf(hero))}
+                          className="w-full relative overflow-hidden rounded-2xl aspect-video bg-secondary-100 dark:bg-secondary-800 group focus:outline-none"
+                        >
+                          <img
+                            src={hero.url}
+                            alt={hero.altText || business!.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/25 transition-colors">
+                            <svg className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zm-4-4v2m0 0v2m0-2h2m-2 0H9" />
+                            </svg>
+                          </div>
+                          {hero.isPrimary && (
+                            <span className="absolute top-3 left-3 bg-yellow-400/90 text-black text-xs font-bold px-2.5 py-0.5 rounded-full">
+                              Principal
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Thumbnail strip */}
+                        {thumbs.length > 0 && (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                            {thumbs.map((img) => (
+                              <button
+                                key={img.id}
+                                onClick={() => setLightboxIndex(ordered.indexOf(img))}
+                                className="relative overflow-hidden rounded-xl aspect-square bg-secondary-100 dark:bg-secondary-800 group focus:outline-none"
+                              >
+                                <img
+                                  src={img.url}
+                                  alt={img.altText || ''}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
 
             {/* Reservation Card Sidebar */}
@@ -191,8 +261,8 @@ export default function BusinessDetailPage({ params }: PageProps) {
                 {/* Features List */}
                 <div className="space-y-3 mb-4 md:mb-8">
                   {[
-                    { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, text: 'Confirmación inmediata' },
                     { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>, text: 'Disponibilidad en tiempo real' },
+                    { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, text: 'Confirmación inmediata' },
                     { icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, text: 'Cambios flexibles' }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
@@ -228,6 +298,65 @@ export default function BusinessDetailPage({ params }: PageProps) {
       </div>
       </>
       )}
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (() => {
+        const ordered = [...images].sort((a, b) => {
+          if (a.isPrimary && !b.isPrimary) return -1;
+          if (!a.isPrimary && b.isPrimary) return 1;
+          return (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+        });
+        const total = ordered.length;
+        const prev = () => setLightboxIndex((lightboxIndex - 1 + total) % total);
+        const next = () => setLightboxIndex((lightboxIndex + 1) % total);
+        const img = ordered[lightboxIndex];
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 text-white/80 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            {total > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); prev(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            <div className="max-w-5xl max-h-[85vh] px-16" onClick={(e) => e.stopPropagation()}>
+              <img
+                src={img.url}
+                alt={img.altText || ''}
+                className="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl"
+              />
+              {img.altText && (
+                <p className="text-white/70 text-sm text-center mt-3">{img.altText}</p>
+              )}
+              <p className="text-white/40 text-xs text-center mt-1">{lightboxIndex + 1} / {total}</p>
+            </div>
+            {total > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); next(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

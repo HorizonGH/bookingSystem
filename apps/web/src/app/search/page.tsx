@@ -325,9 +325,9 @@ export default function SearchPage() {
                 >
                   {/* Image Area */}
                   <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary-500/10 to-secondary-500/10">
-                    {tenant.logoUrl ? (
+                    {(tenant.primaryImageUrl || tenant.logoUrl) ? (
                       <img
-                        src={tenant.logoUrl}
+                        src={tenant.primaryImageUrl || tenant.logoUrl!}
                         alt={tenant.name}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />

@@ -25,6 +25,7 @@ public class BookingDbContext : DbContext
     public DbSet<WorkerService> WorkerServices => Set<WorkerService>();
     public DbSet<WorkerSchedule> WorkerSchedules => Set<WorkerSchedule>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<TenantImage> TenantImages => Set<TenantImage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
