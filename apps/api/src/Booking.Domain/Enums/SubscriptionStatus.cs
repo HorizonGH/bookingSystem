@@ -6,5 +6,7 @@ public enum SubscriptionStatus
     Active,
     Suspended,
     Cancelled,
-    Expired
+    Expired,
+    /// <summary>Paid plan selected at registration but not yet approved by SuperAdmin.</summary>
+    Pending
 }

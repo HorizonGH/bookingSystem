@@ -210,14 +210,16 @@ public class AuthService : IAuthService
         _context.Tenants.Add(tenant);
 
         // Create tenant plan
+        // Free plans are immediately active; paid plans stay Pending until a SuperAdmin approves the payment.
+        var isPaidPlan = plan.PlanType != PlanType.Free;
         var tenantPlan = new TenantPlan
         {
             TenantId = tenant.Id,
             PlanId = plan.Id,
             StartDate = DateTime.UtcNow,
-            SubscriptionStatus = SubscriptionStatus.Active,
-            TrialEndsAt = plan.PlanType == PlanType.Free ? null : DateTime.UtcNow.AddDays(14), // 14-day trial for paid plans
-            NextBillingDate = plan.PlanType == PlanType.Free ? null : DateTime.UtcNow.AddMonths(1),
+            SubscriptionStatus = isPaidPlan ? SubscriptionStatus.Pending : SubscriptionStatus.Active,
+            TrialEndsAt = null,
+            NextBillingDate = isPaidPlan ? null : null,
             CurrentPrice = plan.Price,
             CurrentWorkers = 0,
             CurrentServices = 0,

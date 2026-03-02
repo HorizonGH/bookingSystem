@@ -26,6 +26,10 @@ public class BookingDbContext : DbContext
     public DbSet<WorkerSchedule> WorkerSchedules => Set<WorkerSchedule>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<TenantImage> TenantImages => Set<TenantImage>();
+    
+    // Payments
+    public DbSet<PaymentSession> PaymentSessions => Set<PaymentSession>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +46,8 @@ public class BookingDbContext : DbContext
         modelBuilder.Entity<WorkerSchedule>().HasQueryFilter(e => e.StatusBaseEntity != Domain.Enums.StatusBaseEntity.Delete);
         modelBuilder.Entity<Reservation>().HasQueryFilter(e => e.StatusBaseEntity != Domain.Enums.StatusBaseEntity.Delete);
         modelBuilder.Entity<RefreshToken>().HasQueryFilter(e => e.StatusBaseEntity != Domain.Enums.StatusBaseEntity.Delete);
+        modelBuilder.Entity<PaymentSession>().HasQueryFilter(e => e.StatusBaseEntity != Domain.Enums.StatusBaseEntity.Delete);
+        modelBuilder.Entity<Payment>().HasQueryFilter(e => e.StatusBaseEntity != Domain.Enums.StatusBaseEntity.Delete);
         
         // Note: User, Role, Worker, and Service filters omitted to avoid EF Core warnings
         // with many-to-many relationships. Apply soft delete filtering in repositories/queries.

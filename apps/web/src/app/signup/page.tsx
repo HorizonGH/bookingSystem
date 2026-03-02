@@ -184,8 +184,12 @@ export default function SignupPage() {
         }
       });
       console.log('Tenant registration successful:', response.user);
-      // Redirect to dashboard or home
-      window.location.href = '/';
+      // If user chose a paid plan, send them to the wizard to complete payment
+      if (selectedPlan !== PlanType.Free) {
+        window.location.href = `/upgrade?planType=${selectedPlan}`;
+      } else {
+        window.location.href = '/';
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
