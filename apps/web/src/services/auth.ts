@@ -21,6 +21,15 @@ export enum PlanType {
   Enterprise
 }
 
+export enum SubscriptionStatus {
+  Trial,
+  Active,
+  Suspended,
+  Cancelled,
+  Expired,
+  Pending,
+}
+
 export interface RegisterTenantRequest {
   userRequest: {
     firstName: string;
@@ -80,11 +89,24 @@ export interface User {
 export interface Tenant {
   id: string;
   name: string;
+  slug?: string;
   description: string;
+  logoUrl?: string;
+  website?: string;
+  email?: string;
+  phoneNumber?: string;
   address: string;
   city: string;
+  state?: string;
   country: string;
+  postalCode?: string;
+  businessHours?: string;
+  defaultScheduleStartTime?: string;
+  defaultScheduleEndTime?: string;
+  allowedScheduleDays?: string;
+  primaryImageUrl?: string;
   planType: number;
+  subscriptionStatus?: number; // SubscriptionStatus enum
   isActive: boolean;
   created: string;
   lastModified?: string;
@@ -145,9 +167,14 @@ export const authService = {
     const res = await apiClient.get<any>(`/tenants/${tenantId}`);
     const tenant = res?.tenant ?? res;
 
-    // If plan info is returned separately, ensure `planType` is available on the tenant object
-    if (res?.plan && (tenant.planType === undefined || tenant.planType === null)) {
-      tenant.planType = res.plan.planType;
+    // If plan info is returned separately, merge relevant fields into the tenant object
+    if (res?.plan) {
+      if (tenant.planType === undefined || tenant.planType === null) {
+        tenant.planType = res.plan.planType;
+      }
+      if (tenant.subscriptionStatus === undefined || tenant.subscriptionStatus === null) {
+        tenant.subscriptionStatus = res.plan.subscriptionStatus;
+      }
     }
 
     return tenant as Tenant;

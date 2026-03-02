@@ -208,6 +208,11 @@ class ApiClient {
         );
       }
 
+      // 204 No Content — return null without attempting to parse JSON
+      if (response.status === 204) {
+        return null as unknown as T;
+      }
+
       const data = await response.json();
       return data;
     } catch (error) {

@@ -10,8 +10,8 @@ namespace Booking.Application.Features.Auth.Queries.Me;
 
 public class GetProfileInfoQueryHandler : IRequestHandler<GetProfileInfoQuery, GetProfileInfoResponse>
 {
-        private readonly ICurrentUserService _currentUser;
-        private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IUnitOfWork _unitOfWork;
 
     public GetProfileInfoQueryHandler(ICurrentUserService currentUser, IUnitOfWork unitOfWork)
     {
@@ -28,20 +28,31 @@ public class GetProfileInfoQueryHandler : IRequestHandler<GetProfileInfoQuery, G
         {
             throw new UnauthorizedAccessException("User not authenticated");
         }
-        var userId =  _currentUser.UserId.Value;
+        var userId = _currentUser.UserId.Value;
 
         var user = await userRepo.GetByIdAsync(userId);
-        var userReservations = await reservationRepo.GetAll().Where(r => r.ClientId == userId).ToListAsync(cancellationToken);
+        if (user == null)
+        {
+            // should never happen for a valid authenticated token, but guard against it
+            throw new UnauthorizedAccessException("User not found");
+        }
+
+        var userReservations = await reservationRepo.GetAll()
+            .Where(r => r.ClientId == userId)
+            .ToListAsync(cancellationToken);
+
+        var roles = _currentUser.Roles.ToList();
 
         return new GetProfileInfoResponse
         {
-            Id = user!.Id,
+            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             TenantId = user.TenantId,
-            //Role = user.Plan,
+            Role = roles.FirstOrDefault() ?? string.Empty,
+            Roles = roles,
             Reservations = userReservations.Select(r => new ReservationDto
             {
                 Id = r.Id,
@@ -51,7 +62,7 @@ public class GetProfileInfoQueryHandler : IRequestHandler<GetProfileInfoQuery, G
                 EndTime = r.EndTime,
                 ReservationStatus = r.ReservationStatus
             }).ToList()
+
         };
     }
-
 }

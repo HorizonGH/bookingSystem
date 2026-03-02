@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Booking.Application.Common.Interfaces;
 using Booking.Application.Common.Models;
@@ -54,6 +55,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
+        // Register background services
+        services.AddHostedService<SubscriptionExpirationService>();
+
         // Register repositories and Unit of Work
         services.AddScoped(typeof(IReadRepository<>), typeof(Repositories.ReadRepository<>));
         services.AddScoped(typeof(IWriteRepository<>), typeof(Repositories.WriteRepository<>));
@@ -79,7 +83,9 @@ public static class ServiceCollectionExtensions
                 ValidateAudience = true,
                 ValidAudience = jwtSettings.Audience,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                NameClaimType = ClaimTypes.NameIdentifier,
+                RoleClaimType = ClaimTypes.Role
             };
         });
 
