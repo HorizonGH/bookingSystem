@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/bin
+**/obj
+**/.vs
+**/*.user
+**/*.suo
+**/TestResults
+**/.idea
+**/node_modules
+**/*.md
+Dockerfile
+.dockerignore
+render.yaml

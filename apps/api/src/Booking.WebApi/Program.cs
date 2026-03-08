@@ -9,6 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Bind to PORT env var provided by Render (falls back to 8080 locally)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "3000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // Add HttpContextAccessor for CurrentUserService
 builder.Services.AddHttpContextAccessor();
 
@@ -48,16 +52,18 @@ builder.Services.SwaggerDocument(o =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Always run migrations on startup (covers both Development and Production/Render)
+using (var scope = app.Services.CreateScope())
 {
-    // Auto-migrate database in development
-    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
     await dbContext.Database.MigrateAsync();
 }
 
-app.UseHttpsRedirection();
+// Only redirect HTTPS locally — Render handles SSL termination at the load balancer
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowAll");
 // Enable Authentication & Authorization
 app.UseAuthentication();
@@ -69,11 +75,8 @@ app.UseFastEndpoints(c =>
     c.Endpoints.RoutePrefix = "api";
 });
 
-// Use Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwaggerGen();
-}
+// Use Swagger in all environments so the deployed API is explorable
+app.UseSwaggerGen();
 
 app.Run();
 

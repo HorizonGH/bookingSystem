@@ -2,6 +2,10 @@
   "name": "saas-booking",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -16,9 +20,5 @@
   "devDependencies": {
     "turbo": "^2.0.0",
     "prettier": "^3.2.5"
-  },
-  "packageManager": "pnpm@8.15.0",
-  "engines": {
-    "node": ">=18"
   }
 }
