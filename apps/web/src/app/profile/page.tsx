@@ -53,6 +53,10 @@ export default function ProfilePage() {
           }
         }
       } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          window.location.href = `/login?returnTo=${encodeURIComponent('/profile')}`;
+          return;
+        }
         if (err instanceof ApiError) {
           setError(err.message);
         } else {

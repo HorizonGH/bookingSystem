@@ -143,6 +143,11 @@ class ApiClient {
 
         this.isRefreshing = true;
 
+        // Capture whether the user had tokens BEFORE the refresh attempt.
+        // If they had none, they are simply an unauthenticated visitor on a
+        // public page — we must NOT redirect them to /login automatically.
+        const hadTokens = !!(tokenStorage.getRefreshToken() || tokenStorage.getAccessToken());
+
         // Attempt to refresh the token
         const refreshed = await this.attemptTokenRefresh();
 
@@ -157,11 +162,12 @@ class ApiClient {
 
             try {
               response = await fetch(url, config);
-              
-              // If still 401 after refresh, logout
+
+              // If still 401 after refresh, the session is truly invalid —
+              // redirect only if the user was previously authenticated.
               if (response.status === 401) {
                 tokenStorage.clearTokens();
-                if (window.location.pathname !== '/login') {
+                if (hadTokens && window.location.pathname !== '/login') {
                   const currentPath = window.location.pathname + window.location.search;
                   window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
                 }
@@ -177,21 +183,21 @@ class ApiClient {
             throw new ApiError('Invalid token after refresh', 401, {});
           }
         } else {
-          // Token refresh failed, clear tokens and redirect to login
+          // Token refresh failed — clean up and only redirect if the user had
+          // an active session. Unauthenticated visitors on public pages must
+          // not be bounced to /login.
           this.isRefreshing = false;
           this.processQueue();
 
-          if (typeof window !== 'undefined') {
-            try {
-              tokenStorage.clearTokens();
-            } catch (e) {
-              // ignore storage errors
-            }
+          try {
+            tokenStorage.clearTokens();
+          } catch (e) {
+            // ignore storage errors
+          }
 
+          if (hadTokens && window.location.pathname !== '/login') {
             const currentPath = window.location.pathname + window.location.search;
-            if (window.location.pathname !== '/login') {
-              window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
-            }
+            window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
           }
 
           throw new ApiError('Token refresh failed', 401, {});

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Iniciar Sesión',
-  description: 'Accedé a tu cuenta de ReservaSmart para gestionar tus reservas y citas.',
+  description: 'Accede a tu cuenta de ReservaSmart para gestionar tus reservas y citas.',
   alternates: { canonical: '/login' },
   robots: { index: false, follow: false },
 };

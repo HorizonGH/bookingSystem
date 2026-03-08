@@ -34,6 +34,10 @@ export default function BusinessSettingsPage() {
         setTenant(t);
       } catch (err) {
         console.error(err);
+        if (err instanceof ApiError && err.status === 401) {
+          window.location.href = `/login?returnTo=${encodeURIComponent(window.location.pathname)}`;
+          return;
+        }
         if (err instanceof ApiError) setError(err.message);
         else setError('Error al cargar la configuración del negocio');
       } finally {
