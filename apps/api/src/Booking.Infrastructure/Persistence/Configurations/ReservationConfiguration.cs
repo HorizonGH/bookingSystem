@@ -55,5 +55,11 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
         builder.HasIndex(r => new { r.TenantId, r.StartTime, r.EndTime });
         builder.HasIndex(r => new { r.WorkerId, r.StartTime });
         builder.HasIndex(r => r.ReservationStatus);
+        
+        // Prevent double-booking: unique constraint per worker + time slot for non-cancelled/non-deleted reservations
+        builder.HasIndex(r => new { r.WorkerId, r.StartTime, r.EndTime })
+            .IsUnique()
+            .HasFilter("\"ReservationStatus\" != 2 AND \"StatusBaseEntity\" != 1")
+            .HasDatabaseName("IX_Reservations_Worker_TimeSlot_NoCancelled");
     }
 }
