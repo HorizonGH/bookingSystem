@@ -73,6 +73,9 @@ export const metadata: Metadata = {
     icon: '/icon.ico',
     shortcut: '/icon.ico',
   },
+  verification: {
+    google: 'SXgFlNLZVyTSyOlwz3K9Edfvdfuh03mvRo_PDWHAkwY',
+  },
 };
 
 export default function RootLayout({
