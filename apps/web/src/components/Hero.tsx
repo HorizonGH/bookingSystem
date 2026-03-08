@@ -85,9 +85,9 @@ export function Hero() {
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-dark dark:text-light mb-4 md:mb-6 leading-[1.1]">
-              Gestión de reservas <br className="hidden lg:block"/>
+              Reserva Smart: <br className="hidden lg:block"/>
               <span className="bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
-                sin complicaciones
+                reservas sin complicaciones
               </span>
             </h1>
 

@@ -20,72 +20,10 @@ export default function PricingPage() {
     planType?: number;
   };
 
-  // fallback (used while API loads or if the API fails)
-  const [plans, setPlans] = useState<UIPlan[]>([
-    {
-      name: 'Starter',
-      description: 'Perfecto para negocios que están comenzando',
-      monthlyPrice: 29,
-      yearlyPrice: 290,
-      features: [
-        'Hasta 100 reservas/mes',
-        'Calendario básico',
-        'Notificaciones por email',
-        '1 usuario',
-        'Soporte por email',
-        'Panel de control básico'
-      ],
-      highlighted: false,
-      color: 'from-secondary-500 to-secondary-600',
-      planType: 0
-    },
-    {
-      name: 'Professional',
-      description: 'Ideal para negocios en crecimiento',
-      monthlyPrice: 79,
-      yearlyPrice: 790,
-      features: [
-        'Reservas ilimitadas',
-        'Calendario avanzado',
-        'Notificaciones SMS + Email',
-        'Hasta 5 usuarios',
-        'Soporte prioritario 24/7',
-        'Dashboard completo con analytics',
-        'Integración con Google Calendar',
-        'Recordatorios automáticos',
-        'Personalización de marca'
-      ],
-      highlighted: true,
-      color: 'from-primary-500 to-secondary-600',
-      badge: 'Más Popular',
-      planType: 2
-    },
-    {
-      name: 'Enterprise',
-      description: 'Para negocios grandes y cadenas',
-      monthlyPrice: 199,
-      yearlyPrice: 1990,
-      features: [
-        'Todo en Professional',
-        'Usuarios ilimitados',
-        'Múltiples ubicaciones',
-        'API completa',
-        'Gerente de cuenta dedicado',
-        'Capacitación personalizada',
-        'White-label disponible',
-        'SLA garantizado',
-        'Integraciones personalizadas',
-        'Reportes avanzados'
-      ],
-      highlighted: false,
-      color: 'from-purple-500 to-pink-600',
-      planType: 3
-    }
-  ]);
+  const [plans, setPlans] = useState<UIPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  // Load plans from API and map them into the UI shape. Supports APIs that
-  // return separate entries per billingCycle (monthly/yearly) or a single
-  // price per plan.
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -106,7 +44,7 @@ export default function PricingPage() {
             const monthly = entries.find((e) => e.billingCycle && e.billingCycle.toLowerCase().includes('month'));
             const yearly = entries.find((e) => e.billingCycle && e.billingCycle.toLowerCase().includes('year'));
             const monthlyPrice = monthly ? monthly.price : entries[0].price ?? 0;
-            const yearlyPrice = yearly ? yearly.price : monthlyPrice;
+            const yearlyPrice = yearly ? yearly.price : Math.round(monthlyPrice * 10.5);
 
             const entry = entries[0];
             const name = entry.name || (pt === 0 ? 'Starter' : pt === 1 ? 'Basic' : pt === 2 ? 'Professional' : 'Enterprise');
@@ -138,9 +76,12 @@ export default function PricingPage() {
             };
           });
 
-        if (mounted && mapped.length > 0) setPlans(mapped);
+        if (mounted) setPlans(mapped);
       } catch (err) {
-        console.warn('Could not load plans from API, using fallback.', err);
+        console.warn('Could not load plans from API.', err);
+        if (mounted) setLoadError('No se pudieron cargar los planes. Intentá de nuevo más tarde.');
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     })();
     return () => { mounted = false; };
@@ -212,8 +153,40 @@ export default function PricingPage() {
 
       {/* Pricing Cards Grid */}
         <div className="container mx-auto px-4 pb-16 md:pb-32 relative z-10">
+
+        {/* Loading skeleton */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto items-center">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="bg-white dark:bg-dark-light rounded-3xl shadow-xl border border-light-darker dark:border-secondary-700 p-8 sm:p-10 animate-pulse">
+                <div className="h-6 w-1/2 bg-secondary-200 dark:bg-secondary-700 rounded-lg mb-3" />
+                <div className="h-4 w-3/4 bg-secondary-100 dark:bg-secondary-800 rounded mb-6" />
+                <div className="h-12 w-1/3 bg-secondary-200 dark:bg-secondary-700 rounded-lg mb-8" />
+                <div className="h-12 w-full bg-secondary-100 dark:bg-secondary-800 rounded-xl mb-8" />
+                <div className="space-y-3">
+                  {[0,1,2,3].map((j) => (
+                    <div key={j} className="h-4 w-full bg-secondary-100 dark:bg-secondary-800 rounded" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error state */}
+        {!isLoading && loadError && (
+          <div className="max-w-md mx-auto text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-red-600 dark:text-red-400 font-medium">{loadError}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto items-center">
-          {plans.map((plan, index) => {
+          {!isLoading && !loadError && plans.map((plan, index) => {
             const { price, period } = getPrice(plan);
 
             return (

@@ -4,48 +4,56 @@ import { ThemeProvider } from "../components/ThemeProvider";
 import { Header } from "../components/Header";
 import DialogRenderer from '../components/DialogRenderer';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reservasmart.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reserva-smart.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'ReservaSmart – Plataforma de Reservas Online',
-    template: '%s | ReservaSmart',
+    default: 'Reserva Smart – Plataforma de Reservas Online para Negocios',
+    template: '%s | Reserva Smart',
   },
   description:
-    'ReservaSmart es la plataforma profesional para gestionar reservas y citas de tu negocio. Agenda inteligente, notificaciones automáticas y más.',
+    'Reserva Smart (ReservaSmart) es la plataforma profesional para gestionar reservas y citas de tu negocio. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Prueba gratis!',
   keywords: [
+    'reserva smart',
+    'reserva-smart',
+    'reservasmart',
     'reservas online',
+    'sistema de reservas',
     'sistema de citas',
     'agenda digital',
     'gestión de turnos',
     'software de reservas',
-    'booking',
+    'reservar turno online',
+    'plataforma de reservas',
+    'booking online',
+    'turnos online',
+    'agenda online para negocios',
   ],
-  authors: [{ name: 'ReservaSmart', url: SITE_URL }],
-  creator: 'ReservaSmart',
+  authors: [{ name: 'Reserva Smart', url: SITE_URL }],
+  creator: 'Reserva Smart',
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     url: SITE_URL,
-    siteName: 'ReservaSmart',
-    title: 'ReservaSmart – Plataforma de Reservas Online',
+    siteName: 'Reserva Smart',
+    title: 'Reserva Smart – Plataforma de Reservas y Citas Online',
     description:
-      'Gestiona las reservas y citas de tu negocio con ReservaSmart. Agenda inteligente, notificaciones automáticas y panel de control completo.',
+      'Gestiona las reservas y citas de tu negocio con Reserva Smart. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'ReservaSmart – Plataforma de Reservas Online',
+        alt: 'Reserva Smart – Plataforma de Reservas Online',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ReservaSmart – Plataforma de Reservas Online',
+    title: 'Reserva Smart – Plataforma de Reservas y Citas Online',
     description:
-      'Gestiona las reservas y citas de tu negocio con ReservaSmart.',
+      'Gestiona las reservas y citas de tu negocio con Reserva Smart. ¡Empieza gratis!',
     images: ['/og-image.png'],
   },
   robots: {

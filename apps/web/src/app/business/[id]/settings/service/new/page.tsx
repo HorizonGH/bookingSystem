@@ -183,8 +183,9 @@ export default function NewServicePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold mb-1.5 text-secondary-700 dark:text-secondary-300">
-                  Buffer antes (min)
+                  Tiempo de preparación antes (min)
                 </label>
+                <p className="text-xs text-secondary-400 dark:text-secondary-500 mb-1.5">Minutos libres antes de que comience el turno</p>
                 <input
                   type="number"
                   value={formData.bufferTimeBefore}
@@ -195,8 +196,9 @@ export default function NewServicePage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1.5 text-secondary-700 dark:text-secondary-300">
-                  Buffer después (min)
+                  Tiempo de limpieza después (min)
                 </label>
+                <p className="text-xs text-secondary-400 dark:text-secondary-500 mb-1.5">Minutos libres después de que termina el turno</p>
                 <input
                   type="number"
                   value={formData.bufferTimeAfter}

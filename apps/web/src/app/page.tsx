@@ -5,33 +5,37 @@ import { Features } from '@/components/Features';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'ReservaSmart – Gestión de Reservas y Citas Online',
+  title: 'Reserva Smart – Gestión de Reservas y Citas Online',
   description:
-    'Optimiza la agenda de tu negocio con ReservaSmart. Reservas inteligentes, calendario en tiempo real, notificaciones automáticas y panel de control completo. ¡Probá gratis!',
+    'Reserva Smart (reserva-smart) es la plataforma para gestionar reservas y citas de tu negocio. Agenda inteligente, calendario en tiempo real, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
   alternates: { canonical: '/' },
 };
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reserva-smart.vercel.app';
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'WebSite',
-      name: 'ReservaSmart',
-      url: 'https://reservasmart.app',
+      name: 'Reserva Smart',
+      alternateName: ['ReservaSmart', 'reserva-smart'],
+      url: SITE_URL,
       potentialAction: {
         '@type': 'SearchAction',
         target: {
           '@type': 'EntryPoint',
-          urlTemplate: 'https://reservasmart.app/search?q={search_term_string}',
+          urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
         },
         'query-input': 'required name=search_term_string',
       },
     },
     {
       '@type': 'Organization',
-      name: 'ReservaSmart',
-      url: 'https://reservasmart.app',
-      logo: 'https://reservasmart.app/logo.png',
+      name: 'Reserva Smart',
+      alternateName: ['ReservaSmart', 'reserva-smart'],
+      url: SITE_URL,
+      logo: `${SITE_URL}/og-image.png`,
       sameAs: ['https://www.instagram.com/_horizon.gh'],
       contactPoint: {
         '@type': 'ContactPoint',
@@ -41,7 +45,8 @@ const jsonLd = {
     },
     {
       '@type': 'SoftwareApplication',
-      name: 'ReservaSmart',
+      name: 'Reserva Smart',
+      alternateName: 'ReservaSmart',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       offers: {
@@ -50,7 +55,7 @@ const jsonLd = {
         priceCurrency: 'USD',
       },
       description:
-        'Plataforma profesional para gestionar reservas y citas online. Agenda inteligente, notificaciones automáticas y panel de control completo.',
+        'Reserva Smart: plataforma profesional para gestionar reservas y citas online. Agenda inteligente, notificaciones automáticas y panel de control completo.',
     },
   ],
 };

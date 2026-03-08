@@ -9,10 +9,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind to PORT env var provided by Render (falls back to 8080 locally)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "3000";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
+// Bind to PORT env var provided by Render (falls back to 3000 locally)
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 // Add HttpContextAccessor for CurrentUserService
 builder.Services.AddHttpContextAccessor();
 
