@@ -27,18 +27,17 @@ export function Footer() {
             <div>
               <h4 className="font-semibold mb-4 text-dark dark:text-light">Empresa</h4>
               <ul className="space-y-2.5 text-sm text-secondary-600 dark:text-secondary-400">
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Sobre Nosotros</a></li>
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Empleo</a></li>
+                <li><Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Sobre Nosotros</Link></li>
+                <li><Link href="/about#faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Preguntas Frecuentes</Link></li>
+                <li><Link href="/about#contacto" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Contacto</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4 text-dark dark:text-light">Soporte</h4>
               <ul className="space-y-2.5 text-sm text-secondary-600 dark:text-secondary-400">
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Centro de Ayuda</a></li>
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Contacto</a></li>
-                <li><a href="#" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Documentación API</a></li>
+                <li><Link href="/about#faq" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Centro de Ayuda</Link></li>
+                <li><a href="https://www.instagram.com/_horizon.gh" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Contacto</a></li>
               </ul>
             </div>
           </div>
