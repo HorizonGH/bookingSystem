@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     shortcut: '/icon.ico',
   },
   verification: {
-    google: 'SXgFlNLZVyTSyOlwz3K9Edfvdfuh03mvRo_PDWHAkwY',
+    google: 'Qd15CkolKYXIhHSVZQSKsouKqCVGD4vjhagYkzg1V8w',
   },
 };
 
