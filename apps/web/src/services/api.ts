@@ -183,9 +183,8 @@ class ApiClient {
             throw new ApiError('Invalid token after refresh', 401, {});
           }
         } else {
-          // Token refresh failed — clean up and only redirect if the user had
-          // an active session. Unauthenticated visitors on public pages must
-          // not be bounced to /login.
+          // Token refresh failed — clear tokens and retry without auth header
+          // (endpoint may allow anonymous access)
           this.isRefreshing = false;
           this.processQueue();
 
@@ -195,13 +194,160 @@ class ApiClient {
             // ignore storage errors
           }
 
-          if (hadTokens && window.location.pathname !== '/login') {
-            const currentPath = window.location.pathname + window.location.search;
-            window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+          // ALWAYS retry without Authorization header first
+          // Don't redirect just because there are old tokens in storage
+          const retryHeaders: Record<string, string> = {};
+          
+          // Only set Content-Type if needed, but NEVER include Authorization
+          if (
+            options.method &&
+            ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) &&
+            options.body &&
+            !(options.body instanceof FormData)
+          ) {
+            retryHeaders['Content-Type'] = 'application/json';
           }
 
-          throw new ApiError('Token refresh failed', 401, {});
+          const retryConfig: RequestInit = {
+            ...options,
+            headers: retryHeaders,
+            method: options.method,
+          };
+
+          try {
+            response = await fetch(url, retryConfig);
+            
+            // If retry still fails with 401, then the endpoint requires authentication
+            if (!response.ok && response.status === 401) {
+              // Only redirect to login if user had valid tokens (was authenticated)
+              if (hadTokens && window.location.pathname !== '/login') {
+                const currentPath = window.location.pathname + window.location.search;
+                window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+                return new Promise(() => {}); // Never resolves, page redirects
+              }
+              
+              const errorData = await response.json().catch(() => ({}));
+              throw new ApiError(
+                errorData.message || `HTTP error! status: 401`,
+                401,
+                errorData
+              );
+            }
+          } catch (retryError) {
+            if (retryError instanceof ApiError) {
+              throw retryError;
+            }
+            throw new ApiError('Network error or unexpected issue', 0);
+          }
         }
+      }
+
+      // Handle 403 Forbidden - may indicate invalid token
+      if (response.status === 403 && typeof window !== 'undefined') {
+        const token = tokenStorage.getAccessToken();
+        
+        // Only attempt refresh if we have a token (i.e., user was authenticated)
+        if (token) {
+          // If already refreshing, queue this request
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.onTokenRefresh(() => {
+                // Retry the request with new token
+                this.request<T>(endpoint, options)
+                  .then(resolve)
+                  .catch(reject);
+              });
+            });
+          }
+
+          this.isRefreshing = true;
+
+          // Try to refresh the token
+          const refreshed = await this.attemptTokenRefresh();
+
+          if (refreshed) {
+            // Token refresh successful, retry the original request
+            const newToken = tokenStorage.getAccessToken();
+            if (newToken) {
+              config.headers = {
+                ...config.headers,
+                Authorization: `Bearer ${newToken}`,
+              };
+
+              try {
+                response = await fetch(url, config);
+
+                if (response.status === 403) {
+                  // Still forbidden after refresh - keep the error
+                  this.isRefreshing = false;
+                  this.processQueue();
+                  const errorData = await response.json().catch(() => ({}));
+                  throw new ApiError(
+                    errorData.message || `HTTP error! status: 403`,
+                    403,
+                    errorData
+                  );
+                }
+              } finally {
+                this.isRefreshing = false;
+                this.processQueue();
+              }
+            } else {
+              this.isRefreshing = false;
+              this.processQueue();
+            }
+          } else {
+            // Token refresh failed - clear tokens and retry without auth header
+            // (endpoint may allow anonymous access)
+            this.isRefreshing = false;
+            this.processQueue();
+
+            try {
+              tokenStorage.clearTokens();
+            } catch (e) {
+              // ignore storage errors
+            }
+
+            // Retry the request without the Authorization header
+            const retryHeaders: Record<string, string> = {};
+            
+            // Only set Content-Type if needed, but NEVER include Authorization
+            if (
+              options.method &&
+              ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) &&
+              options.body &&
+              !(options.body instanceof FormData)
+            ) {
+              retryHeaders['Content-Type'] = 'application/json';
+            }
+
+            const retryConfig: RequestInit = {
+              ...options,
+              headers: retryHeaders,
+              method: options.method,
+            };
+
+            try {
+              response = await fetch(url, retryConfig);
+              
+              // If retry still fails with 403, throw the error
+              if (!response.ok && response.status === 403) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new ApiError(
+                  errorData.message || `HTTP error! status: 403`,
+                  403,
+                  errorData
+                );
+              }
+            } catch (retryError) {
+              if (retryError instanceof ApiError) {
+                throw retryError;
+              }
+              throw new ApiError('Network error or unexpected issue', 0);
+            }
+          }
+        }
+        // If no token, fall through to the error handling below
       }
 
       if (!response.ok) {

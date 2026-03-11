@@ -87,6 +87,26 @@ public class CreateWorkerCommandHandler : IRequestHandler<CreateWorkerCommand, W
         var writeRepo = _unitOfWork.WriteRepository<Worker>();
         await writeRepo.AddAsync(worker);
 
+        // Create default WorkerSchedule entries based on the tenant's constraints
+        var allowedDays = tenant.AllowedScheduleDays
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(d => (DayOfWeek)int.Parse(d.Trim()))
+            .ToList();
+
+        var scheduleWriteRepo = _unitOfWork.WriteRepository<WorkerSchedule>();
+        foreach (var day in allowedDays)
+        {
+            await scheduleWriteRepo.AddAsync(new WorkerSchedule
+            {
+                WorkerId = worker.Id,
+                DayOfWeek = day,
+                StartTime = tenant.DefaultScheduleStartTime,
+                EndTime = tenant.DefaultScheduleEndTime,
+                IsAvailable = true,
+                Created = DateTime.UtcNow
+            });
+        }
+
         // Update worker count
         tenantPlan.CurrentWorkers++;
         var tenantPlanWriteRepo = _unitOfWork.WriteRepository<TenantPlan>();

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { use, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { tenantService, TenantDto } from '../../../../services/tenant';
 import { reservationService, CreateReservationRequest, ReservationStatus } from '../../../../services/reservation';
 import { ApiError } from '../../../../services/api';
@@ -10,6 +11,7 @@ import { PlanType } from '../../../../services/auth';
 import MessagePopup from '../../../../components/MessagePopup';
 import { scheduleService, TimeSlotDto, WorkerScheduleDto, formatDateToYYYYMMDD } from '../../../../services/schedule';
 import { serviceService, ServiceDto } from '../../../../services/service';
+import { useAuth } from '../../../../lib/useAuth';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -18,6 +20,8 @@ interface PageProps {
 export default function ReservarPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const businessId = resolvedParams.id;
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   
   const [business, setBusiness] = useState<TenantDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -613,25 +617,43 @@ export default function ReservarPage({ params }: PageProps) {
                       </div>
 
                       {/* Submit Button */}
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Procesando...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Confirmar Reserva</span>
+                      {!isAuthenticated ? (
+                        <div className="space-y-3">
+                          <button
+                            type="button"
+                            onClick={() => router.push('/login')}
+                            className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <span>Inicia sesión para reservar</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                          </>
-                        )}
-                      </button>
+                          </button>
+                          <p className="text-xs text-secondary-500 text-center">
+                            Necesitas estar autenticado para hacer una reserva
+                          </p>
+                        </div>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <span>Procesando...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Confirmar Reserva</span>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </>
+                          )}
+                        </button>
+                      )}
 
                       <p className="text-xs text-secondary-500 text-center leading-relaxed px-4">
                         Al confirmar, aceptas nuestros <a href="#" className="underline hover:text-primary-500">Términos de Servicio</a> y <a href="#" className="underline hover:text-primary-500">Política de Privacidad</a>.

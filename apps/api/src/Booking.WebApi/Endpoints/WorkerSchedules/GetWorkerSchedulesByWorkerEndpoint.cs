@@ -30,7 +30,7 @@ public class GetWorkerSchedulesByWorkerEndpoint : CoreEndpoint<GetWorkerSchedule
             .Produces(200)
             .ProducesProblem(400));
         
-        Roles("TenantAdmin", "Worker");
+        AllowAnonymous();
     }
 
     public override async Task HandleAsync(GetWorkerSchedulesByWorkerRequest req, CancellationToken ct)

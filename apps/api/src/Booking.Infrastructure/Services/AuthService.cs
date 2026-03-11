@@ -265,6 +265,25 @@ public class AuthService : IAuthService
 
         _context.Workers.Add(worker);
 
+        // Create default WorkerSchedule entries for the owner based on the tenant's constraints
+        var ownerAllowedDays = tenant.AllowedScheduleDays
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(d => (DayOfWeek)int.Parse(d.Trim()))
+            .ToList();
+
+        foreach (var day in ownerAllowedDays)
+        {
+            _context.WorkerSchedules.Add(new WorkerSchedule
+            {
+                WorkerId = worker.Id,
+                DayOfWeek = day,
+                StartTime = tenant.DefaultScheduleStartTime,
+                EndTime = tenant.DefaultScheduleEndTime,
+                IsAvailable = true,
+                Created = DateTime.UtcNow
+            });
+        }
+
         // Update worker count in tenant plan
         tenantPlan.CurrentWorkers = 1;
 
