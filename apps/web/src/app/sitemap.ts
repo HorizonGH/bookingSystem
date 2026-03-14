@@ -1,32 +1,41 @@
 import type { MetadataRoute } from 'next';
 
+import { getSiteUrl } from '../lib/siteUrl';
+
 export const dynamic = 'force-static';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reserva-smart.vercel.app';
+const SITE_URL = getSiteUrl();
+
+function formatDate(date: Date) {
+  // Use YYYY-MM-DD (no time) to maximize parser compatibility.
+  return date.toISOString().slice(0, 10);
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const today = formatDate(new Date());
+
   return [
     {
       url: SITE_URL,
-      lastModified: new Date(),
+      lastModified: today,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${SITE_URL}/pricing`,
-      lastModified: new Date(),
+      lastModified: today,
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${SITE_URL}/search`,
-      lastModified: new Date(),
+      lastModified: today,
       changeFrequency: 'daily',
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/about`,
-      lastModified: new Date(),
+      lastModified: today,
       changeFrequency: 'monthly',
       priority: 0.6,
     },

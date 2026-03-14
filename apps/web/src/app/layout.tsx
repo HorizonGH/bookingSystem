@@ -4,7 +4,9 @@ import { ThemeProvider } from "../components/ThemeProvider";
 import { Header } from "../components/Header";
 import DialogRenderer from '../components/DialogRenderer';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reserva-smart.vercel.app';
+import { getSiteUrl } from '../lib/siteUrl';
+
+const SITE_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
