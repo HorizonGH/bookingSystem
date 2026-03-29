@@ -174,7 +174,7 @@ export default function AboutPage() {
                 </svg>
               </div>
 
-              <h2 className="text-3xl font-extrabold mb-3">¿Tenés alguna pregunta?</h2>
+              <h2 className="text-3xl font-extrabold mb-3">¿Tienes alguna pregunta?</h2>
               <p className="text-white/80 max-w-lg mx-auto mb-8 leading-relaxed">
                 Estamos para ayudarte. Escribinos por Instagram y te respondemos a la brevedad.
                 También podés contactarnos para activar un plan premium o para cualquier consulta sobre la plataforma.

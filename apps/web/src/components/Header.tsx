@@ -61,6 +61,12 @@ export function Header() {
             >
               Precios
             </Link>
+            <Link
+              href="/about"
+              className="px-4 py-2 text-secondary-700 dark:text-light-darker hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-200 rounded-lg hover:bg-light-darker dark:hover:bg-dark"
+            >
+              Información
+            </Link>
           </nav>
 
           {/* Actions */}
@@ -128,6 +134,13 @@ export function Header() {
                 className="px-4 py-2.5 text-secondary-700 dark:text-light-darker hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-200 rounded-xl hover:bg-light-darker dark:hover:bg-dark"
               >
                 Precios
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-2.5 text-secondary-700 dark:text-light-darker hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-200 rounded-xl hover:bg-light-darker dark:hover:bg-dark"
+              >
+                Información
               </Link>
             </div>
           </nav>

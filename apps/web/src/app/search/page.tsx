@@ -5,11 +5,8 @@ import Link from 'next/link';
 import { tenantService, TenantDto, PaginationRequest } from '../../services/tenant';
 import { ApiError } from '../../services/api';
 
-const CATEGORIES = ['Todos', 'Restaurante', 'Belleza', 'Salud', 'Fitness', 'Spa', 'Automotriz'];
-
 export default function SearchPage() {
   const [tenants, setTenants] = useState<TenantDto[]>([]);
-  const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +40,6 @@ export default function SearchPage() {
     try {
       // Use provided options or fall back to state
       const effectiveCategoryFilter = options?.category ?? categoryFilter;
-      const effectiveActiveCategory = options?.category !== undefined ? '' : activeCategory;
       const effectiveCityFilter = options?.city ?? cityFilter;
       const effectiveCountryFilter = options?.country ?? countryFilter;
       const effectiveSearchTerm = options?.search ?? searchTerm;
@@ -54,10 +50,8 @@ export default function SearchPage() {
       const filters: Record<string, any> = {};
       
       // Category filtering - filter by Description (uses Contains matching)
-      // This works since business descriptions typically mention their type
-      const categoryValue = effectiveCategoryFilter || (effectiveActiveCategory !== 'Todos' ? effectiveActiveCategory : '');
-      if (categoryValue) {
-        filters.description = categoryValue;
+      if (effectiveCategoryFilter) {
+        filters.description = effectiveCategoryFilter;
       }
       
       if (effectiveCityFilter) {
@@ -92,15 +86,11 @@ export default function SearchPage() {
     }
   };
 
-  // Fetch tenants on mount and when category button changes
+  // Fetch tenants on mount
   useEffect(() => {
-    if (currentPage === 1) {
-      fetchTenants();
-    } else {
-      setCurrentPage(1); // Reset to page 1 when category changes
-    }
+    fetchTenants();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory]);
+  }, []);
   
   // Fetch tenants when page number changes
   useEffect(() => {
@@ -238,7 +228,6 @@ export default function SearchPage() {
                       setCategoryFilter('');
                       setCityFilter('');
                       setCountryFilter('');
-                      setActiveCategory('Todos');
                       setSearchTerm('');
                       setCurrentPage(1);
                       // Pass empty values explicitly to avoid race condition
@@ -252,26 +241,6 @@ export default function SearchPage() {
               </div>
             </div>
           )}
-
-          {/* Categories Scroll */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setActiveCategory(cat);
-                  setCategoryFilter(''); // Clear manual category filter when clicking category button
-                }}
-                className={`flex-shrink-0 px-3 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  activeCategory === cat
-                    ? 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white shadow-lg shadow-primary-500/25 transform scale-105'
-                    : 'bg-white dark:bg-dark-light text-secondary-600 dark:text-secondary-400 border border-light-darker dark:border-secondary-700 hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -279,11 +248,18 @@ export default function SearchPage() {
       <main className="container mx-auto px-4 md:px-6 py-8">
         {/* Loading State */}
         {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-secondary-600 dark:text-secondary-400">Cargando negocios...</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-8">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="bg-white dark:bg-dark-light rounded-2xl overflow-hidden border border-light-darker dark:border-secondary-700 shadow-sm animate-pulse">
+                <div className="h-48 bg-light-darker dark:bg-secondary-800" />
+                <div className="p-5">
+                  <div className="h-5 bg-light-darker dark:bg-secondary-800 rounded w-3/4 mb-3" />
+                  <div className="h-4 bg-light-darker dark:bg-secondary-800 rounded w-5/6 mb-2" />
+                  <div className="h-4 bg-light-darker dark:bg-secondary-800 rounded w-2/3 mb-4" />
+                  <div className="h-3 bg-light-darker dark:bg-secondary-800 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -380,6 +356,7 @@ export default function SearchPage() {
                       )}
                       <Link
                         href={`/business/${tenant.id}#reservation`}
+                        prefetch={false}
                         className="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold rounded-lg hover:from-primary-600 hover:to-secondary-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-1 ml-auto"
                       >
                         Ver más
@@ -458,7 +435,6 @@ export default function SearchPage() {
             <button 
               onClick={() => {
                 setSearchTerm(''); 
-                setActiveCategory('Todos');
                 setCategoryFilter('');
                 setCityFilter('');
                 setCountryFilter('');

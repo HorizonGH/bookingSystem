@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useRef } from 'react';
 import { tenantService, TenantDto, TenantImageDto } from '../../../services/tenant';
 import { ApiError } from '../../../services/api';
 
@@ -18,6 +18,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
   const [error, setError] = useState('');
   const [images, setImages] = useState<TenantImageDto[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const fetchedIdsRef = useRef<Set<string>>(new Set());
 
   // Fetch business data
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
         ]);
         setBusiness(businessData);
         setImages(imageData);
+        fetchedIdsRef.current.add(businessId);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
@@ -41,6 +43,11 @@ export default function BusinessDetailPage({ params }: PageProps) {
         setIsLoading(false);
       }
     };
+
+    if (fetchedIdsRef.current.has(businessId)) {
+      setIsLoading(false);
+      return;
+    }
 
     fetchBusiness();
   }, [businessId]);

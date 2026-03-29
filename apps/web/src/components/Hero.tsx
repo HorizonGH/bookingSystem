@@ -106,73 +106,14 @@ export function Hero() {
             {/* Stats section removed as requested */}
           </div>
 
-          {/* Visual Content - Glassmorphic Dashboard Preview */}
+          {/* Visual Content - Hero Image */}
           <div className="flex-1 w-full max-w-xl lg:max-w-none relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary-500 to-secondary-500 rounded-2xl blur-lg opacity-20 transform rotate-2 scale-95"></div>
-            
-            <div className="relative bg-white dark:bg-dark-light border border-light-darker dark:border-secondary-700 rounded-2xl shadow-2xl overflow-hidden animate-slideUp">
-              {/* Fake Window Header */}
-              <div className="h-10 border-b border-light-darker dark:border-secondary-700 bg-gray-50 dark:bg-secondary-800/50 flex items-center px-4 gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-              </div>
-
-              {/* Dashboard Content Mockup */}
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <div className="h-4 w-32 bg-secondary-200 dark:bg-secondary-700 rounded animate-pulse mb-2"></div>
-                    <div className="h-3 w-20 bg-secondary-100 dark:bg-secondary-800 rounded animate-pulse"></div>
-                  </div>
-                  <div className="h-8 w-24 bg-primary-500 rounded-lg opacity-20"></div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20">
-                    <div className="h-8 w-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 mb-3"></div>
-                    <div className="h-5 w-16 bg-orange-200 dark:bg-orange-800/50 rounded mb-1"></div>
-                    <div className="h-3 w-24 bg-orange-100 dark:bg-orange-900/30 rounded"></div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
-                    <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 mb-3"></div>
-                    <div className="h-5 w-16 bg-blue-200 dark:bg-blue-800/50 rounded mb-1"></div>
-                    <div className="h-3 w-24 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-light-darker dark:bg-secondary-800/30">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/20"></div>
-                      <div>
-                        <div className="h-3 w-24 bg-secondary-200 dark:bg-secondary-700 rounded mb-1"></div>
-                        <div className="h-2 w-16 bg-secondary-100 dark:bg-secondary-800 rounded"></div>
-                      </div>
-                    </div>
-                    <div className="h-6 w-16 bg-green-100 dark:bg-green-900/20 rounded-full"></div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-light-darker dark:bg-secondary-800/30">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-secondary-100 dark:bg-secondary-800"></div>
-                      <div>
-                        <div className="h-3 w-24 bg-secondary-200 dark:bg-secondary-700 rounded mb-1"></div>
-                        <div className="h-2 w-16 bg-secondary-100 dark:bg-secondary-800 rounded"></div>
-                      </div>
-                    </div>
-                    <div className="h-6 w-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating Card */}
-            <div className="absolute -bottom-6 -right-6 lg:-right-10 bg-white dark:bg-dark border border-light-darker dark:border-secondary-700 p-4 rounded-xl shadow-xl animate-float" style={{ animationDelay: '1s' }}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-xs font-bold text-dark dark:text-light">Sistema Activo</span>
-              </div>
-              <div className="text-lg font-bold text-primary-600 dark:text-primary-400">99.9% Uptime</div>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="/heroImage.png"
+                alt="Hero"
+                className="w-full h-auto object-cover"
+              />
             </div>
           </div>
         </div>
