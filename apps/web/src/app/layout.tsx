@@ -11,15 +11,16 @@ const SITE_URL = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Reserva Smart – Plataforma de Reservas Online para Negocios',
-    template: '%s | Reserva Smart',
+    default: 'Zita Smart – Plataforma de Reservas Online para Negocios',
+    template: '%s | Zita Smart',
   },
   description:
-    'Reserva Smart (ReservaSmart) es la plataforma profesional para gestionar reservas y citas de tu negocio. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Prueba gratis!',
+    'Zita Smart (ZitaSmart) es la plataforma profesional para gestionar reservas y citas de tu negocio. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Prueba gratis!',
   keywords: [
     'reserva smart',
-    'reserva-smart',
-    'reservasmart',
+    'zita smart',
+    'zita-smart',
+    'ZitaSmart',
     'reservas online',
     'sistema de reservas',
     'sistema de citas',
@@ -32,30 +33,30 @@ export const metadata: Metadata = {
     'turnos online',
     'agenda online para negocios',
   ],
-  authors: [{ name: 'Reserva Smart', url: SITE_URL }],
-  creator: 'Reserva Smart',
+  authors: [{ name: 'Zita Smart', url: SITE_URL }],
+  creator: 'Zita Smart',
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     url: SITE_URL,
-    siteName: 'Reserva Smart',
-    title: 'Reserva Smart – Plataforma de Reservas y Citas Online',
+    siteName: 'Zita Smart',
+    title: 'Zita Smart – Plataforma de Reservas y Citas Online',
     description:
-      'Gestiona las reservas y citas de tu negocio con Reserva Smart. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
+      'Gestiona las reservas y citas de tu negocio con Zita Smart. Agenda inteligente, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Reserva Smart – Plataforma de Reservas Online',
+        alt: 'Zita Smart – Plataforma de Reservas Online',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reserva Smart – Plataforma de Reservas y Citas Online',
+    title: 'Zita Smart – Plataforma de Reservas y Citas Online',
     description:
-      'Gestiona las reservas y citas de tu negocio con Reserva Smart. ¡Empieza gratis!',
+      'Gestiona las reservas y citas de tu negocio con Zita Smart. ¡Empieza gratis!',
     images: ['/og-image.png'],
   },
   robots: {

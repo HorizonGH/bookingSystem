@@ -85,7 +85,7 @@ export function Hero() {
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-dark dark:text-light mb-4 md:mb-6 leading-[1.1]">
-              Reserva Smart: <br className="hidden lg:block"/>
+              Zita Smart: <br className="hidden lg:block"/>
               <span className="bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
                 reservas sin complicaciones
               </span>
@@ -111,7 +111,7 @@ export function Hero() {
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
               <img
                 src="/heroImage.png"
-                alt="Hero"
+                alt="Interfaz de Zita Smart para gestionar reservas y citas en línea"
                 className="w-full h-auto object-cover"
               />
             </div>

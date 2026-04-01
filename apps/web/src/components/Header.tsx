@@ -37,7 +37,7 @@ export function Header() {
               </svg>
             </div>
             <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-dark to-secondary-700 dark:from-light dark:to-light-darker bg-clip-text text-transparent">
-              ReservaSmart
+              ZitaSmart
             </span>
           </Link>
 

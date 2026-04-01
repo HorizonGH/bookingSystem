@@ -5,21 +5,21 @@ import { Features } from '@/components/Features';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Reserva Smart – Gestión de Reservas y Citas Online',
+  title: 'Zita Smart – Gestión de Reservas y Citas Online',
   description:
-    'Reserva Smart (reserva-smart) es la plataforma para gestionar reservas y citas de tu negocio. Agenda inteligente, calendario en tiempo real, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
+    'Zita Smart (zita-smart) es la plataforma para gestionar reservas y citas de tu negocio. Agenda inteligente, calendario en tiempo real, notificaciones automáticas y panel de control completo. ¡Empieza gratis!',
   alternates: { canonical: '/' },
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reserva-smart.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://zita-smart.vercel.app';
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'WebSite',
-      name: 'Reserva Smart',
-      alternateName: ['ReservaSmart', 'reserva-smart'],
+      name: 'Zita Smart',
+      alternateName: ['ZitaSmart', 'zita-smart'],
       url: SITE_URL,
       potentialAction: {
         '@type': 'SearchAction',
@@ -32,8 +32,8 @@ const jsonLd = {
     },
     {
       '@type': 'Organization',
-      name: 'Reserva Smart',
-      alternateName: ['ReservaSmart', 'reserva-smart'],
+      name: 'Zita Smart',
+      alternateName: ['ZitaSmart', 'zita-smart'],
       url: SITE_URL,
       logo: `${SITE_URL}/og-image.png`,
       sameAs: ['https://www.instagram.com/_horizon.gh'],
@@ -45,8 +45,8 @@ const jsonLd = {
     },
     {
       '@type': 'SoftwareApplication',
-      name: 'Reserva Smart',
-      alternateName: 'ReservaSmart',
+      name: 'Zita Smart',
+      alternateName: 'ZitaSmart',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       offers: {
@@ -55,7 +55,39 @@ const jsonLd = {
         priceCurrency: 'USD',
       },
       description:
-        'Reserva Smart: plataforma profesional para gestionar reservas y citas online. Agenda inteligente, notificaciones automáticas y panel de control completo.',
+        'Zita Smart: plataforma profesional para gestionar reservas y citas online. Agenda inteligente, notificaciones automáticas y panel de control completo.',
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Inicio',
+          item: SITE_URL,
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: '¿Cómo empiezo con Zita Smart?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Regístrate en el sitio, configura tus servicios y comienza a aceptar reservas en minutos.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: '¿La plataforma es segura?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Sí, usamos cifrado y medidas de seguridad para proteger tus datos y los de tus clientes.',
+          },
+        },
+      ],
     },
   ],
 };

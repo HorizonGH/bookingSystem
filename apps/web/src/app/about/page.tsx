@@ -6,15 +6,15 @@ import { Footer } from '../../components/Footer';
 
 const FAQS = [
   {
-    q: '¿Qué es ReservaSmart?',
-    a: 'ReservaSmart es una plataforma que permite a negocios de cualquier rubro gestionar sus reservas y citas de forma digital. Los clientes pueden encontrar tu negocio, elegir un servicio y reservar su turno en segundos, sin llamadas ni mensajes de WhatsApp.',
+    q: '¿Qué es ZitaSmart?',
+    a: 'ZitaSmart es una plataforma que permite a negocios de cualquier rubro gestionar sus reservas y citas de forma digital. Los clientes pueden encontrar tu negocio, elegir un servicio y reservar su turno en segundos, sin llamadas ni mensajes de WhatsApp.',
   },
   {
     q: '¿Tengo que pagar para empezar?',
     a: 'No. El plan Starter es completamente gratuito y te permite empezar a recibir reservas de inmediato. Podés escalar a un plan premium cuando tu negocio lo necesite.',
   },
   {
-    q: '¿Qué tipo de negocios pueden usar ReservaSmart?',
+    q: '¿Qué tipo de negocios pueden usar ZitaSmart?',
     a: 'Cualquier negocio que trabaje por turnos: peluquerías, barberías, centros de estética, clínicas, gimnasios, spas, talleres mecánicos, estudios de tatuajes y más.',
   },
   {
@@ -93,7 +93,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto leading-relaxed">
-            ReservaSmart nació con un objetivo claro: que cualquier negocio —sin importar su tamaño— pueda ofrecer
+            ZitaSmart nació con un objetivo claro: que cualquier negocio —sin importar su tamaño— pueda ofrecer
             una experiencia de reserva moderna y sin fricciones, tanto para el cliente como para el dueño.
           </p>
         </div>

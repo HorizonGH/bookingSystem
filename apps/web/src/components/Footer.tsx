@@ -8,7 +8,7 @@ export function Footer() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="font-bold text-lg mb-4 bg-gradient-to-r from-primary-600 to-secondary-600 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
-                ReservaSmart
+                ZitaSmart
               </h3>
               <p className="text-secondary-600 dark:text-secondary-400 text-sm leading-relaxed">
                 Gestión moderna de reservas para negocios modernos
@@ -43,7 +43,7 @@ export function Footer() {
           </div>
 
           <div className="pt-8 border-t border-light-darker dark:border-dark-light text-center text-sm text-secondary-600 dark:text-secondary-400">
-            <p>&copy; 2026 ReservaSmart. Todos los derechos reservados.</p>
+            <p>&copy; 2026 ZitaSmart. Todos los derechos reservados.</p>
           </div>
         </div>
       </div>

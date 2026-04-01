@@ -125,7 +125,7 @@ export default function PricingPage() {
         <div className="flex justify-center mb-8 md:mb-16">
           <div className="bg-white/50 dark:bg-dark-light/50 backdrop-blur-md p-1.5 rounded-2xl border border-light-darker dark:border-secondary-700 shadow-lg inline-flex relative">
              <div className="absolute -top-3 -right-6 md:-right-10 rotate-12 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
-                Ahorra 17% 🔥
+                Ahorra 12.5% 🔥
              </div>
             <button
               onClick={() => setBillingCycle('monthly')}

@@ -13,5 +13,5 @@ export function getSiteUrl() {
   // When deployed to Vercel and a custom domain isn't configured via env vars,
   // default to the Vercel-provided domain so the site remains functional.
   // For a custom domain, set NEXT_PUBLIC_SITE_URL to that domain.
-  return 'https://reserva-smart.vercel.app';
+  return 'https://zita-smart.vercel.app';
 }
