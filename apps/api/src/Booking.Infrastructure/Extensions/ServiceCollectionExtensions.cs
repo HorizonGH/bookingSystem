@@ -108,6 +108,13 @@ public static class ServiceCollectionExtensions
             options.AddPolicy(Authorization.PolicyNames.WorkerAccess, policy =>
                 policy.RequireRole("Worker", "TenantAdmin", "SuperAdmin"));
 
+            // Analytics feature access
+            options.AddPolicy(Authorization.PolicyNames.HasAnalytics, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.AddRequirements(new Authorization.Requirements.AnalyticsRequirement(allowSuperAdmin: true));
+            });
+
             // Tenant isolation - validates user belongs to the tenant being accessed
             options.AddPolicy(Authorization.PolicyNames.TenantAccess, policy =>
             {
@@ -119,6 +126,8 @@ public static class ServiceCollectionExtensions
         // Register authorization handlers
         services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, 
             Authorization.Handlers.TenantAuthorizationHandler>();
+        services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, 
+            Authorization.Handlers.AnalyticsAuthorizationHandler>();
         
         return services;
     }

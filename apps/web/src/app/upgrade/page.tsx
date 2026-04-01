@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { authService, User } from '../../services/auth';
 import { planService, PlanDto } from '../../services/plan';
 import { tenantService } from '../../services/tenant';
@@ -96,9 +95,9 @@ export default function UpgradePage() {
             </svg>
           </div>
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <Link href="/profile" className="text-primary-600 dark:text-primary-400 hover:underline font-medium">
+          <a href="/profile" className="text-primary-600 dark:text-primary-400 hover:underline font-medium">
             Volver al perfil
-          </Link>
+          </a>
         </div>
       </div>
     );
@@ -106,6 +105,38 @@ export default function UpgradePage() {
 
   // Plan names mapping
   const planNameMap: Record<number, string> = { 1: 'Basic', 2: 'Professional', 3: 'Enterprise' };
+
+  const getPlanFeatures = (plan: PlanDto): string[] => {
+    const features: string[] = [];
+    const safeReservations = plan.maxReservationsPerMonth === -1 ? Infinity : plan.maxReservationsPerMonth;
+    const safeWorkers = plan.maxWorkers === -1 ? Infinity : plan.maxWorkers;
+    const safeServices = plan.maxServices === -1 ? Infinity : plan.maxServices;
+
+    if (safeReservations !== undefined && safeReservations !== null) {
+      features.push(safeReservations === Infinity ? 'Reservas ilimitadas' : `${safeReservations} reservas/mes`);
+    }
+    if (safeWorkers !== undefined && safeWorkers !== null) {
+      features.push(safeWorkers === Infinity ? 'Trabajadores ilimitados' : `${safeWorkers} trabajadores`);
+    }
+    if (safeServices !== undefined && safeServices !== null) {
+      features.push(safeServices === Infinity ? 'Servicios ilimitados' : `${safeServices} servicios`);
+    }
+    if (plan.hasCustomBranding) {
+      features.push('Personalización de marca');
+    }
+    if (plan.hasAnalytics) {
+      features.push('Analytics avanzados');
+    }
+    if (plan.hasApiAccess) {
+      features.push('Acceso a API');
+    }
+
+    if (features.length === 0) {
+      features.push('Funciones estándar');
+    }
+
+    return features;
+  };
 
   return (
     <div className="min-h-screen bg-light dark:bg-dark relative overflow-hidden">
@@ -117,7 +148,7 @@ export default function UpgradePage() {
 
       <div className="container mx-auto px-4 py-8 md:py-12 relative z-10 max-w-4xl">
         {/* Back Link */}
-        <Link
+        <a
           href="/profile"
           className="inline-flex items-center text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-400 transition-colors duration-200 mb-6 group"
         >
@@ -125,7 +156,7 @@ export default function UpgradePage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Volver al perfil
-        </Link>
+        </a>
 
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-dark dark:text-light mb-2">
@@ -169,9 +200,9 @@ export default function UpgradePage() {
                   <span className="text-sm font-normal text-secondary-500">/{plan.billingCycle || 'mes'}</span>
                 </div>
                 <div className="mt-3 text-xs text-secondary-500 space-y-1">
-                  {plan.maxWorkers && <p>Hasta {plan.maxWorkers} trabajadores</p>}
-                  {plan.maxServices && <p>Hasta {plan.maxServices} servicios</p>}
-                  {plan.maxReservationsPerMonth && <p>Hasta {plan.maxReservationsPerMonth} reservas/mes</p>}
+                  {getPlanFeatures(plan).map((feature, idx) => (
+                    <p key={idx}>{feature}</p>
+                  ))}
                 </div>
                 <div className="mt-4 text-center">
                   <span className="inline-block px-4 py-2 text-sm font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 rounded-lg group-hover:bg-primary-500 group-hover:text-white transition-all">
@@ -220,16 +251,24 @@ export default function UpgradePage() {
 
               <div>
                 <h2 className="text-2xl font-extrabold text-dark dark:text-light mb-2">
-                  ¿Querés el plan{' '}
+                  ¿Quieres el plan{' '}
                   <span className="text-primary-600 dark:text-primary-400">
                     {selectedPlan.name || planNameMap[selectedPlan.planType]}
                   </span>
                   ?
                 </h2>
-                <p className="text-secondary-600 dark:text-secondary-400 max-w-sm mx-auto">
+                <p className="text-secondary-600 dark:text-secondary-400 max-w-sm mx-auto mb-4">
                   Por el momento los planes premium se gestionan de forma personalizada.
                   Escribinos por Instagram y te ayudamos a activar tu plan.
                 </p>
+                <div className="text-left max-w-md mx-auto">
+                  <p className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">Ventajas del plan</p>
+                  <ul className="list-disc list-inside text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
+                    {getPlanFeatures(selectedPlan).map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
               <a

@@ -246,13 +246,6 @@ export default function TenantManagement({ tenant, tenantId, onUpdate, showEditB
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-light-darker dark:bg-secondary-900/30 rounded-xl p-4">
-            <div className={`w-3 h-3 rounded-full ${tenant.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <p className="text-sm font-semibold text-dark dark:text-light">
-              Estado: {tenant.isActive ? 'Activo' : 'Inactivo'}
-            </p>
-          </div>
-
           <div className="text-xs text-secondary-500 dark:text-secondary-400 pt-4 border-t border-light-darker dark:border-secondary-800">
             <p>Creado: {new Date(tenant.created).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             {tenant.lastModified && (

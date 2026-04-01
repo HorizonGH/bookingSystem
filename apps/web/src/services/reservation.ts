@@ -147,4 +147,12 @@ export const reservationService = {
   async deleteReservation(id: string): Promise<void> {
     return apiClient.delete<void>(`/reservations/${id}`);
   },
+
+  /**
+   * Cancel a reservation (tenant admin)
+   */
+  async cancelReservation(tenantId: string, reservationId: string, cancellationReason?: string): Promise<void> {
+    const payload = cancellationReason ? { cancellationReason } : undefined;
+    await apiClient.put<void>(`/tenants/${tenantId}/reservations/${reservationId}/cancel`, payload);
+  },
 };

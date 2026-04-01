@@ -11,14 +11,14 @@ interface PageProps {
 
 export default function BusinessDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const businessId = resolvedParams.id;
+  const businessSlug = resolvedParams.id;
   
   const [business, setBusiness] = useState<TenantDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [images, setImages] = useState<TenantImageDto[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const fetchedIdsRef = useRef<Set<string>>(new Set());
+  const fetchedSlugsRef = useRef<Set<string>>(new Set());
 
   // Fetch business data
   useEffect(() => {
@@ -26,13 +26,11 @@ export default function BusinessDetailPage({ params }: PageProps) {
       try {
         setIsLoading(true);
         setError('');
-        const [businessData, imageData] = await Promise.all([
-          tenantService.getTenantById(businessId),
-          tenantService.getTenantImages(businessId).catch(() => [] as TenantImageDto[]),
-        ]);
+        const businessData = await tenantService.getTenantBySlug(businessSlug);
+        const imageData = await tenantService.getTenantImages(businessData.id).catch(() => [] as TenantImageDto[]);
         setBusiness(businessData);
         setImages(imageData);
-        fetchedIdsRef.current.add(businessId);
+        fetchedSlugsRef.current.add(businessSlug);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
@@ -44,13 +42,13 @@ export default function BusinessDetailPage({ params }: PageProps) {
       }
     };
 
-    if (fetchedIdsRef.current.has(businessId)) {
+    if (fetchedSlugsRef.current.has(businessSlug)) {
       setIsLoading(false);
       return;
     }
 
     fetchBusiness();
-  }, [businessId]);
+  }, [businessSlug]);
 
   return (
     <div className="min-h-screen bg-light dark:bg-dark relative">
@@ -117,7 +115,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
 
           {/* Hero Content */}
           <div className="max-w-4xl">
-              <div className="flex flex-wrap items-center gap-3 mb-4 animate-slideUp">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white border border-white/20 rounded-full font-bold text-sm">
                     Negocio
                 </span>
@@ -127,11 +125,11 @@ export default function BusinessDetailPage({ params }: PageProps) {
                 </span>
               </div>
               
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-3 md:mb-6 drop-shadow-xl animate-slideUp" style={{animationDelay: '100ms'}}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-3 md:mb-6 drop-shadow-xl">
                   {business.name}
               </h1>
               
-              <div className="hidden sm:flex flex-wrap items-center gap-3 md:gap-6 text-white/90 font-medium animate-slideUp" style={{animationDelay: '200ms'}}>
+              <div className="hidden sm:flex flex-wrap items-center gap-3 md:gap-6 text-white/90 font-medium">
                  <div className="flex items-center gap-1.5">
                     <svg className="w-6 h-6 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                     <span>{business.city || 'Ubicación no especificada'}</span>
@@ -154,7 +152,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
           <div className="lg:flex lg:gap-8">
             
             {/* Main Content */}
-            <div className="lg:flex-1 mb-8 lg:mb-0 space-y-8 animate-slideUp" style={{animationDelay: '300ms'}}>
+            <div className="lg:flex-1 mb-8 lg:mb-0 space-y-8">
               
               {/* Description & Contact Card */}
               <div className="bg-white dark:bg-dark-light rounded-3xl shadow-xl p-4 md:p-8 border border-light-darker dark:border-secondary-700/50 backdrop-blur-sm">
@@ -250,7 +248,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
             </div>
 
             {/* Reservation Card Sidebar */}
-            <div className="lg:w-[400px] animate-slideUp" style={{animationDelay: '400ms'}}>
+            <div className="lg:w-[400px]">
               <div className="bg-white dark:bg-dark-light rounded-3xl shadow-2xl p-5 md:p-8 sticky top-24 border border-light-darker dark:border-secondary-700/50">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                     <h2 className="text-xl md:text-2xl font-bold text-dark dark:text-light">
@@ -283,7 +281,7 @@ export default function BusinessDetailPage({ params }: PageProps) {
                 
                 {/* Reservar Button */}
                 <Link 
-                  href={`/business/${businessId}/reservar`}
+                  href={`/business/${business?.slug ?? businessSlug}/reservar`}
                   className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

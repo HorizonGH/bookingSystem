@@ -105,6 +105,38 @@ export const tenantService = {
   },
 
   /**
+   * Get a tenant by slug for SEO-friendly URLs.
+   */
+  async getTenantBySlug(slug: string): Promise<TenantDto> {
+    if (!slug) {
+      throw new Error('Slug is required');
+    }
+
+    const list = await this.getAllTenants({ filters: { slug } });
+
+    if (!list?.items || list.items.length === 0) {
+      throw new Error(`Negocio no encontrado para el slug: ${slug}`);
+    }
+
+    return list.items[0];
+  },
+
+  /**
+   * Try by ID first, then fallback to slug.
+   */
+  async getTenantByIdOrSlug(value: string): Promise<TenantDto> {
+    try {
+      return await this.getTenantById(value);
+    } catch (error: any) {
+      // Fallback for legacy URLs or (id does not exist) using slug
+      if (error?.status === 404 || error?.response?.status === 404) {
+        return await this.getTenantBySlug(value);
+      }
+      throw error;
+    }
+  },
+
+  /**
    * Get all tenants with pagination, filtering, and sorting
    */
   async getAllTenants(params?: PaginationRequest): Promise<PaginatedResponse<TenantDto>> {

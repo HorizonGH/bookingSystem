@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { authService, User, ReservationDto, Tenant } from '../../services/auth';
+import { authService, User, Tenant } from '../../services/auth';
 import { ApiError } from '../../services/api';
-import TenantManagement from '../../components/TenantManagement';
 import { workerService, WorkerDto } from '../../services/worker';
 import StageWindows from '../../components/StageWindows';
 import ProfileUserWindow from '../../components/ProfileUserWindow';
 import ProfileWorkerWindow from '../../components/ProfileWorkerWindow';
 import ProfileTenantWindow from '../../components/ProfileTenantWindow';
+import ServiceManagement from '../../components/ServiceManagement';
+import WorkerManagement from '../../components/WorkerManagement';
+import ProfileAnalyticsWindow from '../../components/ProfileAnalyticsWindow';
+import TenantReservationsDashboard from '../../components/TenantReservationsDashboard';
+import PendingPaymentsDashboard from '../../components/payments/PendingPaymentsDashboard';
 
 
 export default function ProfilePage() {
@@ -113,6 +117,11 @@ export default function ProfilePage() {
     );
   }
 
+  const role = (user.role || '').toLowerCase();
+  const isSuperAdmin = role === 'superadmin';
+  const isTenantAdmin = role === 'tenantadmin';
+  const canManageTenant = !!user.tenantId && (isTenantAdmin || isSuperAdmin);
+
   const userStage = { id: 'user', title: 'Usuario', content: <ProfileUserWindow user={user} /> };
   const workerStage = {
     id: 'worker',
@@ -127,6 +136,41 @@ export default function ProfilePage() {
     content: isTenantLoading
       ? <div className="bg-white dark:bg-dark-light rounded-2xl shadow-xl p-8 border border-light-darker dark:border-secondary-700"><div className="text-center py-12"><div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-secondary-600 dark:text-secondary-400">Cargando información del negocio...</p></div></div>
       : (tenant ? <ProfileTenantWindow tenant={tenant} tenantId={user.tenantId!} onUpdate={(t) => setTenant(t)} /> : null),
+  };
+  const servicesStage = {
+    id: 'services',
+    title: 'Servicios',
+    content: canManageTenant && tenant
+      ? <ServiceManagement tenantId={tenant.id} planType={tenant.planType ?? 0} />
+      : null,
+  };
+  const workersStage = {
+    id: 'workers',
+    title: 'Equipo',
+    content: canManageTenant && tenant
+      ? <WorkerManagement tenantId={tenant.id} planType={tenant.planType ?? 0} currentUser={user} />
+      : null,
+  };
+  const reservationsStage = {
+    id: 'reservations',
+    title: 'Reservas',
+    content: canManageTenant && user.tenantId
+      ? <TenantReservationsDashboard tenantId={user.tenantId} />
+      : null,
+  };
+  const analyticsStage = {
+    id: 'analytics',
+    title: 'Analytics',
+    content: canManageTenant && user.tenantId
+      ? <ProfileAnalyticsWindow tenantId={user.tenantId} planType={tenant?.planType ?? null} />
+      : null,
+  };
+  const adminStage = {
+    id: 'admin',
+    title: 'Admin',
+    content: isSuperAdmin
+      ? <PendingPaymentsDashboard />
+      : null,
   };
 
   return (
@@ -185,7 +229,7 @@ export default function ProfilePage() {
 
         {/* Main Content Area */}
         <div className="animate-slideUp">
-          <StageWindows stages={[userStage, workerStage, tenantStage]} />
+          <StageWindows stages={[userStage, workerStage, tenantStage, servicesStage, workersStage, reservationsStage, analyticsStage, adminStage]} />
 
 
 

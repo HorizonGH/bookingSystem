@@ -7,18 +7,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Booking.Infrastructure.Services;
 
+using Microsoft.Extensions.Logging;
+
 public class WorkerAvailabilityService : IWorkerAvailabilityService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<WorkerAvailabilityService> _logger;
 
-    public WorkerAvailabilityService(IUnitOfWork unitOfWork)
+    public WorkerAvailabilityService(IUnitOfWork unitOfWork, ILogger<WorkerAvailabilityService> logger)
     {
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<bool> IsWorkerAvailableAsync(Guid workerId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
     {
-        var date = DateTime.SpecifyKind(startTime.Date, DateTimeKind.Utc);
+        startTime = startTime.Kind == DateTimeKind.Utc ? startTime : DateTime.SpecifyKind(startTime.ToUniversalTime(), DateTimeKind.Utc);
+        endTime = endTime.Kind == DateTimeKind.Utc ? endTime : DateTime.SpecifyKind(endTime.ToUniversalTime(), DateTimeKind.Utc);
+
+        _logger.LogDebug("Checking availability for worker {WorkerId} from {StartTime} to {EndTime}", workerId, startTime, endTime);
+
+        if (startTime >= endTime)
+        {
+            _logger.LogWarning("Invalid time range for worker {WorkerId}: start {StartTime} >= end {EndTime}", workerId, startTime, endTime);
+            return false;
+        }
+
+        var date = startTime.Date;
         var dayOfWeek = date.DayOfWeek;
 
         // Get schedules for the date (specific date overrides take precedence)
@@ -36,22 +51,31 @@ public class WorkerAvailabilityService : IWorkerAvailabilityService
         var effectiveSchedules = specificDateSchedules.Any() ? specificDateSchedules : recurringSchedules;
 
         if (!effectiveSchedules.Any())
+        {
+            _logger.LogInformation("Worker {WorkerId} has no schedule entries for {Date}", workerId, date);
             return false; // Worker has no schedule for this date
+        }
 
-        // Check if the requested time falls within any schedule
         var requestedStartTime = startTime.TimeOfDay;
         var requestedEndTime = endTime.TimeOfDay;
+
+        _logger.LogDebug("Worker {WorkerId} schedule candidates: {Schedules}", workerId, effectiveSchedules.Select(s => new { s.StartTime, s.EndTime, s.SpecificDate }).ToList());
 
         var isWithinSchedule = effectiveSchedules.Any(s =>
             requestedStartTime >= s.StartTime &&
             requestedEndTime <= s.EndTime);
 
         if (!isWithinSchedule)
+        {
+            _logger.LogInformation("Worker {WorkerId} requested slot {StartTime}–{EndTime} outside schedule for {Date}", workerId, startTime, endTime, date);
             return false; // Requested time is outside worker's schedule
+        }
 
-        // Check for conflicts with existing reservations
         var hasConflict = await HasScheduleConflictAsync(workerId, startTime, endTime, cancellationToken);
-        
+
+        if (hasConflict)
+            _logger.LogInformation("Worker {WorkerId} has existing reservation conflict for slot {StartTime}–{EndTime}", workerId, startTime, endTime);
+
         return !hasConflict;
     }
 
@@ -153,6 +177,7 @@ public class WorkerAvailabilityService : IWorkerAvailabilityService
                           ),
                      cancellationToken);
 
+        _logger.LogDebug("Conflict check for worker {WorkerId}, slot {StartTime}-{EndTime}: {HasConflict}", workerId, startTime, endTime, hasConflict);
         return hasConflict;
     }
 

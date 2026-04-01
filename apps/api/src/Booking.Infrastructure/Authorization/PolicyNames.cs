@@ -7,4 +7,5 @@ public static class PolicyNames
     public const string TenantAccess = "TenantAccess";
     public const string TenantAdminOrSuperAdmin = "TenantAdminOrSuperAdmin";
     public const string WorkerAccess = "WorkerAccess";
+    public const string HasAnalytics = "HasAnalytics";
 }

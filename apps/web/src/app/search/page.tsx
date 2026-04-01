@@ -355,7 +355,7 @@ export default function SearchPage() {
                         </span>
                       )}
                       <Link
-                        href={`/business/${tenant.id}#reservation`}
+                        href={`/business/${tenant.slug || tenant.id}#reservation`}
                         prefetch={false}
                         className="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold rounded-lg hover:from-primary-600 hover:to-secondary-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-1 ml-auto"
                       >

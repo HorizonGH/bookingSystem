@@ -19,7 +19,7 @@ interface PageProps {
 
 export default function ReservarPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const businessId = resolvedParams.id;
+  const businessSlug = resolvedParams.id;
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   
@@ -28,7 +28,7 @@ export default function ReservarPage({ params }: PageProps) {
   const [error, setError] = useState('');
   
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedSlotStartTime, setSelectedSlotStartTime] = useState('');
   const [numberOfPeople, setNumberOfPeople] = useState(2);
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -57,7 +57,7 @@ export default function ReservarPage({ params }: PageProps) {
       try {
         setIsLoading(true);
         setError('');
-        const businessData = await tenantService.getTenantById(businessId);
+        const businessData = await tenantService.getTenantBySlug(businessSlug);
         setBusiness(businessData);
       } catch (err) {
         if (err instanceof ApiError) {
@@ -71,7 +71,7 @@ export default function ReservarPage({ params }: PageProps) {
     };
 
     fetchBusiness();
-  }, [businessId]);
+  }, [businessSlug]);
 
   // Fetch services for this tenant (used in booking form)
   useEffect(() => {
@@ -164,18 +164,41 @@ export default function ReservarPage({ params }: PageProps) {
     setIsSubmitting(true);
 
     try {
-      // Build UTC ISO timestamps from selected local date + selected time so backend always receives UTC
-      const [hStr, mStr] = selectedTime.split(':');
-      const hour = parseInt(hStr, 10) || 0;
-      const minute = parseInt(mStr, 10) || 0;
-      const startUtc = new Date(Date.UTC(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        hour,
-        minute,
-        0
-      )).toISOString();
+      // Use selected slot ISO from availability result (expected UTC). If selectedSlotStartTime is not ISO, fallback to local conversion.
+      let startUtc: string;
+      if (selectedSlotStartTime) {
+        try {
+          const parsed = new Date(selectedSlotStartTime);
+          if (!Number.isNaN(parsed.getTime())) {
+            startUtc = parsed.toISOString();
+          } else {
+            throw new Error('Invalid slot date');
+          }
+        } catch {
+          // fallback: interpret as local time on selected date
+          const [hStr, mStr] = selectedSlotStartTime.split(':');
+          const hour = parseInt(hStr, 10) || 0;
+          const minute = parseInt(mStr, 10) || 0;
+          startUtc = new Date(Date.UTC(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            hour,
+            minute,
+            0
+          )).toISOString();
+        }
+      } else {
+        // If no slot was selected, default to 00:00 UTC on the chosen date (should not happen when required fields are set)
+        startUtc = new Date(Date.UTC(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+          0,
+          0,
+          0
+        )).toISOString();
+      }
       const endUtc = startUtc; // if you need a duration, compute and add minutes here
 
       // Create reservation request (timestamps in UTC ISO format)
@@ -205,7 +228,7 @@ export default function ReservarPage({ params }: PageProps) {
       
       // Reset form
       setSelectedDate(null);
-      setSelectedTime('');
+      setSelectedSlotStartTime('');
       setCustomerName('');
       setCustomerEmail('');
       setCustomerPhone('');
@@ -378,7 +401,7 @@ export default function ReservarPage({ params }: PageProps) {
             {/* Header */}
             <div className="mb-8">
               <Link 
-                href={`/business/${businessId}`}
+                href={`/business/${business?.slug ?? businessSlug}`}
                 className="inline-flex items-center text-secondary-600 dark:text-secondary-400 hover:text-primary-500 transition-colors duration-200 group w-fit px-4 py-2 rounded-full bg-white dark:bg-dark-light border border-light-darker dark:border-secondary-700 mb-6"
               >
                 <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -508,8 +531,8 @@ export default function ReservarPage({ params }: PageProps) {
                             Hora
                           </label>
                           <select
-                            value={selectedTime}
-                            onChange={(e) => setSelectedTime(e.target.value)}
+                            value={selectedSlotStartTime}
+                            onChange={(e) => setSelectedSlotStartTime(e.target.value)}
                             required
                             disabled={!selectedWorkerId || isLoadingTimeSlots}
                             className="w-full px-4 py-3 rounded-xl border-2 border-light-darker dark:border-secondary-700 bg-light dark:bg-dark text-dark dark:text-light focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 focus:outline-none transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
@@ -527,13 +550,14 @@ export default function ReservarPage({ params }: PageProps) {
                               .filter(slot => slot.isAvailable)
                               .map(slot => {
                                 const startTime = new Date(slot.startTime);
-                                const timeStr = startTime.toLocaleTimeString('es-ES', { 
-                                  hour: '2-digit', 
+                                const timeStr = startTime.toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
                                   minute: '2-digit',
-                                  hour12: false 
+                                  hour12: false,
                                 });
+                                // Keep the source slot in value as UTC ISO; display localized label
                                 return (
-                                  <option key={slot.startTime} value={timeStr}>
+                                  <option key={slot.startTime} value={slot.startTime}>
                                     {timeStr}
                                   </option>
                                 );
